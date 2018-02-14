@@ -5,8 +5,8 @@ A Java implementation of the Baum-Welch algorithm based on HMM models with multi
 This is a university project I'm developing for an exam. Many parts are incorrect (both code and tests) or missing and are subjected to changes without any notice due to the fact I'm still learning most of the subject and I'm actively working on it.
 
 ## References
-* L. R. Rabiner - A Tutorial on Hidden Markov Models: 
+* L. R. Rabiner - A Tutorial on Hidden Markov Models and Selected Applications in Speech Recognition: 
 https://www.cs.ubc.ca/~murphyk/Bayes/rabiner.pdf
 
-* A. Rahimi - An Erratum for "A Tutorial on Hidden Markov Models": 
+* A. Rahimi - An Erratum for "A Tutorial on Hidden Markov Models and Selected Applications in Speech Recognition": 
 http://alumni.media.mit.edu/~rahimi/rabiner/rabiner-errata/rabiner-errata.html

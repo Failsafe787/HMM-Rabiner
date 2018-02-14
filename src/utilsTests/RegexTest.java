@@ -1,3 +1,9 @@
+/*
+ * Released under MIT License (Expat)
+ * @author Luca Banzato
+ * @version 0.1
+ */
+
 package utilsTests;
 
 import static org.junit.jupiter.api.Assertions.*;

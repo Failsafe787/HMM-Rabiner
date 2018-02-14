@@ -1,3 +1,9 @@
+/*
+ * Released under MIT License (Expat)
+ * @author Luca Banzato
+ * @version 0.1
+ */
+
 package utilsTests;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,7 +54,6 @@ public class SparseMatrixTest {
 		test.setToValue(5, 17, 0.0);
 		assertTrue(Double.compare(test.getValue(5, 17), 0.0) == 0);
 	}
-	
 
 	@Test
 	public void testOrder() {

@@ -1,3 +1,9 @@
+/*
+ * Released under MIT License (Expat)
+ * @author Luca Banzato
+ * @version 0.1
+ */
+
 package utilsTests;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,8 +43,8 @@ class TemporalSparseMatrixTest {
 		tspm.setToValue(1, 3, 0.97);
 		tspm.setToZero(4, 3);
 		tspm.setToZero(1, 3);
-		assertTrue(Double.compare(tspm.get(4, 3) , 0.0)==0, "Value deletion failed!");
-		assertTrue(Double.compare(tspm.get(1, 3) , 0.0)==0, "Value deletion failed!");
+		assertTrue(Double.compare(tspm.get(4, 3), 0.0) == 0, "Value deletion failed!");
+		assertTrue(Double.compare(tspm.get(1, 3), 0.0) == 0, "Value deletion failed!");
 	}
 
 	@Test

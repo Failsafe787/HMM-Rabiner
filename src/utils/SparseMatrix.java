@@ -1,3 +1,9 @@
+/*
+ * Released under MIT License (Expat)
+ * @author Luca Banzato
+ * @version 0.1
+ */
+
 package utils;
 
 import java.util.ArrayList;
@@ -43,7 +49,7 @@ public class SparseMatrix implements Iterable<Triplet> {
 	public int getColumnsNumber() { // columns number getter
 		return columnsNumber;
 	}
-	
+
 	public int effectiveSize() { // returns the number of elements != 0 inside the SparseMatrix
 		return matrix.size();
 	}

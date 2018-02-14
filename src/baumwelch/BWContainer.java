@@ -1,3 +1,9 @@
+/*
+ * Released under MIT License (Expat)
+ * @author Luca Banzato
+ * @version 0.1
+ */
+
 package baumwelch;
 
 import utils.GaussianCurve;
@@ -18,6 +24,7 @@ public class BWContainer {
 	private SparseArray pi;
 	private SparseMatrix a;
 	private GaussianCurve[] b;
+	private double[] factors;
 	private double alphaValue = 0.0;
 	
 	
@@ -29,6 +36,10 @@ public class BWContainer {
 		b = new GaussianCurve[nStates];
 		for(int i=0; i<b.length; i++) {
 			b[i] = new GaussianCurve();
+		}
+		factors = new double[sequenceSize];
+		for(int i=0; i<factors.length; i++) {
+			factors[i] = 0.0;
 		}
 	}
 	
@@ -50,6 +61,10 @@ public class BWContainer {
 	
 	public GaussianCurve[] getB() {
 		return b;
+	}
+	
+	public double[] getScalingFactors() {
+		return factors;
 	}
 	
 	public void setAlphaValue(double value) {

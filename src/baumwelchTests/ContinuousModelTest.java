@@ -1,3 +1,9 @@
+/*
+ * Released under MIT License (Expat)
+ * @author Luca Banzato
+ * @version 0.1
+ */
+
 package baumwelchTests;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,37 +24,37 @@ import utils.SparseArray;
 
 class ContinuousModelTest {
 
-//	@Test
-//	public void readFromFileTest() {
-//		Model test = null;
-//		try {
-//			test = new Model(5,"C:\\Users\\Luca Banzato\\Desktop\\phone");
-//		} catch (IllegalPiDefinitionException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IllegalADefinitionException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IllegalBDefinitionException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		SparseMatrix a = test.getA();
-//		GaussianCurve[] b = test.getB();
-//		ArrayList<String> state = test.getStatesNames();
-//		SparseArray pi = test.getPi();
-//		System.out.println(a.toString());
-//		System.out.println(b.toString());
-//		System.out.println(pi.toString());
-//		System.out.println(state.toString());
-//		test.writeToFiles("C:\\Users\\Luca Banzato\\Desktop\\t2\\phone");
-//	}
-	
+	// @Test
+	// public void readFromFileTest() {
+	// Model test = null;
+	// try {
+	// test = new Model(5,"C:\\Users\\Luca Banzato\\Desktop\\phone");
+	// } catch (IllegalPiDefinitionException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// } catch (IllegalADefinitionException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// } catch (IllegalBDefinitionException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// }
+	// SparseMatrix a = test.getA();
+	// GaussianCurve[] b = test.getB();
+	// ArrayList<String> state = test.getStatesNames();
+	// SparseArray pi = test.getPi();
+	// System.out.println(a.toString());
+	// System.out.println(b.toString());
+	// System.out.println(pi.toString());
+	// System.out.println(state.toString());
+	// test.writeToFiles("C:\\Users\\Luca Banzato\\Desktop\\t2\\phone");
+	// }
+
 	@Test
 	public void testCreateAndPrint() {
 		ContinuousModel test = null;
 		try {
-			test = new ContinuousModel(2,"C:\\Users\\Luca Banzato\\Desktop\\balls");
+			test = new ContinuousModel(2, "C:\\Users\\Luca Banzato\\Desktop\\balls");
 		} catch (IllegalPiDefinitionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -66,7 +72,7 @@ class ContinuousModelTest {
 		GaussianCurve[] b = test.getB();
 		ArrayList<String> state = test.getStatesNames();
 		SparseArray pi = test.getPi();
-		assertTrue(test.getNumberOfStates() ==2);
+		assertTrue(test.getNumberOfStates() == 2);
 		assertTrue(a.toString().equals("{[0, 0, 0.1],[0, 1, 0.9],[1, 0, 0.3],[1, 1, 0.7]}"));
 		System.out.println(a.toString());
 		System.out.println(Arrays.toString(b));

@@ -1,3 +1,9 @@
+/*
+ * Released under MIT License (Expat)
+ * @author Luca Banzato
+ * @version 0.1
+ */
+
 package utilsTests;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,7 +39,7 @@ class TripletTest {
 		test.setValue(17.5);
 		assertTrue(Double.compare(test.getValue(), 17.5) == 0);
 	}
-	
+
 	@Test
 	public void testToString() {
 		Triplet test = new Triplet(0, 0, 1.0);

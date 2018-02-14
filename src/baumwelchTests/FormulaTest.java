@@ -1,3 +1,9 @@
+/*
+ * Released under MIT License (Expat)
+ * @author Luca Banzato
+ * @version 0.1
+ */
+
 package baumwelchTests;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,7 +44,7 @@ class FormulaTest {
 		Double[] observations = { 0.384100, 3.022968, 1.920920, 0.384180 };
 		ObsSequence sequence = new ObsSequence(observations);
 		BWContainer container = new BWContainer(test.getNumberOfStates(), sequence.size());
-		double alphaValue = Formula.alpha(test, container, sequence, true);
+		double alphaValue = Formula.alpha(test, container, sequence, true, true);
 		TemporalSparseMatrix alphaMatrix = container.getAlphaMatrix();
 		assertTrue(Double.compare(alphaValue, 1.334122388674474E-4) == 0);
 		System.out.print(alphaMatrix.toStringMatrix());
@@ -74,7 +80,8 @@ class FormulaTest {
 		Double[] observations = { 0.384100, 3.022968, 1.920920, 0.384180 };
 		ObsSequence sequence = new ObsSequence(observations);
 		BWContainer container = new BWContainer(test.getNumberOfStates(), sequence.size());
-		double betaValue = Formula.beta(test, container, sequence, true);
+		double alphaValue = Formula.alpha(test, container, sequence, true, true);
+		double betaValue = Formula.beta(test, container, sequence, true, true);
 		TemporalSparseMatrix betaMatrix = container.getBetaMatrix();
 		System.out.print(betaMatrix.toStringMatrix());
 		assertTrue(Double.compare(betaMatrix.get(3, 0), 1.0) == 0);
@@ -110,8 +117,8 @@ class FormulaTest {
 		Double[] observations = { 0.384100, 3.022968, 1.920920, 0.384180 };
 		ObsSequence sequence = new ObsSequence(observations);
 		BWContainer container = new BWContainer(test.getNumberOfStates(), sequence.size());
-		double alphaValue = Formula.alpha(test, container, sequence, false);
-		double betaValue = Formula.beta(test, container, sequence, false);
+		double alphaValue = Formula.alpha(test, container, sequence, false, false);
+		double betaValue = Formula.beta(test, container, sequence, false, false);
 		double gammaValue = Formula.gamma(test, container, 0, 3);
 		double psiValue = Formula.psi(test, container, sequence, 0, 1, 2);
 		assertTrue(Double.compare(alphaValue, 1.334122388674474E-4) == 0);

@@ -1,3 +1,9 @@
+/*
+ * Released under MIT License (Expat)
+ * @author Luca Banzato
+ * @version 0.1
+ */
+
 package baumwelch;
 
 import java.util.ArrayList;
@@ -41,9 +47,8 @@ public class BaumWelch {
 	}
 
 	// Execute the BaumWelch algorithm
-	public ContinuousModel execute(String outputPath, int mode, int keepbest, boolean debug)
-			throws IllegalStatesNamesSizeException, IllegalADefinitionException, IllegalBDefinitionException,
-			IllegalPiDefinitionException {
+	public ContinuousModel execute(String outputPath, boolean debug) throws IllegalStatesNamesSizeException,
+			IllegalADefinitionException, IllegalBDefinitionException, IllegalPiDefinitionException {
 		workingBench = new ArrayList<BWContainer>(); // Initialize a new "Working Bench" (ArrayList of BWContainers)
 		for (ObsSequence sequence : sequences) {
 			workingBench.add(new BWContainer(currentModel.getNumberOfStates(), sequence.size()));
@@ -53,19 +58,16 @@ public class BaumWelch {
 		boolean convergent = false; // Cycle-breaker
 		do { // START of Baum-Welch iterations
 
-			if (round == 0 && mode == 1) { // Randomize only one time
+			if (round == 0) { // Randomize
 				currentModel.randomize();
 			}
 			for (int i = 0; i < sequences.size(); i++) {
-				if (round == 0 && mode == 2) { // Randomize each time
-					currentModel.randomize();
-				}
 				BWContainer container = workingBench.get(i); // Keeps all the A/B/Pi values in an object
 				ObsSequence sequence = sequences.get(i);
-				double alpha = Formula.alpha(currentModel, container, sequence, debug);
+				double alpha = Formula.alpha(currentModel, container, sequence, true, debug);
 				likelihood *= alpha; // Updates the likelihood of the sequences created by this model
 				container.setAlphaValue(alpha); // Used later for models union
-				double beta = Formula.beta(currentModel, container, sequence, debug);
+				double beta = Formula.beta(currentModel, container, sequence, true, debug);
 
 				// BEGIN of Pi re-estimation
 				SparseArray pi = currentModel.getPi();
@@ -141,6 +143,7 @@ public class BaumWelch {
 			round++;
 			currentModel.writeToFiles(outputPath + "." + round);
 		} while (!convergent && round < 31);
+		System.gc();
 		return currentModel;
 	}
 

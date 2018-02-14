@@ -1,3 +1,9 @@
+/*
+ * Released under MIT License (Expat)
+ * @author Luca Banzato
+ * @version 0.1
+ */
+
 package baumwelchTests;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,9 +46,9 @@ class BaumWelchTest {
 		ArrayList<ObsSequence> al_observations = new ArrayList<ObsSequence>();
 		al_observations.add(observation);
 		BaumWelch bw_test = new BaumWelch(cm_test, al_observations);
-		assertTrue(bw_test!=null);
+		assertTrue(bw_test != null);
 	}
-	
+
 	@Test
 	public void testCreateC2() {
 		String path = "C:\\Users\\Luca Banzato\\Desktop\\test2\\balls";
@@ -66,9 +72,9 @@ class BaumWelchTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		assertTrue(bw_test!=null);
+		assertTrue(bw_test != null);
 		try {
-			bw_test.execute(path, 1, 0, true);
+			bw_test.execute(path, true);
 		} catch (IllegalStatesNamesSizeException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

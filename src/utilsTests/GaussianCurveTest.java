@@ -1,3 +1,9 @@
+/*
+ * Released under MIT License (Expat)
+ * @author Luca Banzato
+ * @version 0.1
+ */
+
 package utilsTests;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,13 +20,13 @@ class GaussianCurveTest {
 		assertTrue(standard != null);
 		try {
 			GaussianCurve custom = new GaussianCurve(4, 7.0);
-			assertTrue(custom!=null);
+			assertTrue(custom != null);
 		} catch (IllegalArgumentException e) {
 			assertFalse(true); // This instruction shouldn't be executed
 		}
 		try {
 			GaussianCurve custom = new GaussianCurve(4, 1.0);
-			assertTrue(custom!=null);
+			assertTrue(custom != null);
 		} catch (IllegalArgumentException e) {
 			assertTrue(false); // This instruction shouldn't be executed
 		}

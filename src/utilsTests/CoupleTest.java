@@ -1,3 +1,9 @@
+/*
+ * Released under MIT License (Expat)
+ * @author Luca Banzato
+ * @version 0.1
+ */
+
 package utilsTests;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,7 +37,7 @@ class CoupleTest {
 		test.setValue(17.5);
 		assertTrue(Double.compare(test.getValue(), 17.5) == 0);
 	}
-	
+
 	@Test
 	public void testToString() {
 		Couple test = new Couple(0, 1.0);
