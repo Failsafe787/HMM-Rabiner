@@ -29,6 +29,10 @@ Version 0.1.1 - February 15, 2018
 - [ ] Tests for Baum-Welch algorithm
 - [ ] Tests based on learning/pruning set and real data
 
+### Revisions
+- [ ] Code cleanup
+- [ ] Optimizations
+
 ## References
 * L. R. Rabiner - A Tutorial on Hidden Markov Models and Selected Applications in Speech Recognition: 
 https://www.cs.ubc.ca/~murphyk/Bayes/rabiner.pdf
