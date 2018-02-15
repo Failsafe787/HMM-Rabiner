@@ -9,6 +9,8 @@ This is a university project I'm developing for an exam. Many parts are incorrec
 ### Current version
 Version 0.1.1 - February 15, 2018
 
+Made with Eclipse Oxygen.2 and Java 9
+
 ### Functionalities
 - [x] Implementation of basic structures (Couple, Triplet, ...) inside utils package
 - [x] Implementation of Alpha, Beta, Gamma and Psi formulas
