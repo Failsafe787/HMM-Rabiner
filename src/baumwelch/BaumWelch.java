@@ -23,8 +23,6 @@ public class BaumWelch {
 	// This class implements
 
 	private ContinuousModel currentModel;
-	public final static int ONERANDOMCOPY = 1; // A single, repeated model is used for N multiple sequences
-	public final static int EACHRANDOM = 2; // N different models are used for N multiple sequences
 	private ArrayList<ObsSequence> sequences;
 	private ArrayList<BWContainer> workingBench;
 	private double currentLikelihood;
@@ -64,6 +62,7 @@ public class BaumWelch {
 			for (int i = 0; i < sequences.size(); i++) {
 				BWContainer container = workingBench.get(i); // Keeps all the A/B/Pi values in an object
 				ObsSequence sequence = sequences.get(i);
+				System.out.println("Associated Gaussian: " + currentModel.getB()[i].toString());
 				double alpha = Formula.alpha(currentModel, container, sequence, true, debug);
 				likelihood *= alpha; // Updates the likelihood of the sequences created by this model
 				container.setAlphaValue(alpha); // Used later for models union
@@ -83,12 +82,12 @@ public class BaumWelch {
 				for (Triplet cell : a) {
 					double value = 0.0;
 					double numerator = 0.0;
-					for (int t = 0; t < sequence.size(); t++) {
+					for (int t = 0; t < sequence.size() - 1; t++) {
 						numerator += Formula.psi(currentModel, container, sequence, cell.getX(), cell.getY(), t);
 					}
 					if (Double.compare(numerator, 0.0) != 0) {
 						double denominator = 0.0;
-						for (int t = 0; t < sequence.size(); t++) {
+						for (int t = 0; t < sequence.size() - 1; t++) {
 							numerator += Formula.gamma(currentModel, container, cell.getX(), t);
 						}
 						value = numerator / denominator;

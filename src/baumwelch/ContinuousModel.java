@@ -105,7 +105,7 @@ public class ContinuousModel {
 	}
 
 	public void randomize() {
-		Random randomgen = new Random();
+		Random randomgen = new Random(); // This need to be replaced with a probability generator
 		for (Couple cell : pi) {
 			cell.setValue(randomgen.nextDouble());
 		}

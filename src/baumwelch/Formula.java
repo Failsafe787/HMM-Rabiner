@@ -41,7 +41,7 @@ public class Formula {
 			}
 			if (debug) {
 				System.out
-						.println("alpha(1)(" + statesNames.get(state) + ") = " + pi1 + " x " + bi1 + " = " + pi1 * bi1);
+						.println("alpha(0)(" + statesNames.get(state) + ") = " + pi1 + " x " + bi1 + " = " + pi1 * bi1);
 			}
 		}
 
@@ -52,7 +52,7 @@ public class Formula {
 				int state = cell.getX();
 				cell.setValue(cell.getValue() * factors[0]);
 				if (debug) {
-					System.out.println("alpha(1)(" + statesNames.get(state) + ") scaled by a factor C = " + factors[0]
+					System.out.println("alpha(0)(" + statesNames.get(state) + ") scaled by a factor C = " + factors[0]
 							+ " --> " + cell.getValue());
 				}
 			}
@@ -69,13 +69,13 @@ public class Formula {
 				StringBuilder summatory = null;
 				if (debug) {
 					summatory = new StringBuilder("");
-					summatory.append("alpha(" + (t + 1) + ")(" + statesNames.get(j) + ") = ");
+					summatory.append("alpha(" + t + ")(" + statesNames.get(j) + ") = ");
 					summatory.append("(");
 				}
 				for (Couple cell : previousColumn) {
 					alphaInduction += cell.getValue() * a.getValue(cell.getX(), j);
 					if (debug) {
-						summatory.append("alpha(" + t + ")(" + statesNames.get(cell.getX()) + ") [" + cell.getValue()
+						summatory.append("alpha(" + (t - 1) + ")(" + statesNames.get(cell.getX()) + ") [" + cell.getValue()
 								+ "] x " + a.getValue(cell.getX(), j) + " + ");
 					}
 				}
@@ -108,7 +108,7 @@ public class Formula {
 					int state = cell.getX();
 					cell.setValue(cell.getValue() * factors[t]);
 					if (debug) {
-						System.out.println("alpha(" + (t + 1) + ")(" + statesNames.get(state)
+						System.out.println("alpha(" + t + ")(" + statesNames.get(state)
 								+ ") scaled by a factor C = " + factors[t] + " --> " + cell.getValue());
 					}
 				}
@@ -160,15 +160,17 @@ public class Formula {
 		for (int state = 0; state < numberOfStates; state++) { // Initialization
 			betaMatrix.setToValue(time - 1, state, 1.0);
 			if (debug) {
-				System.out.println("beta(" + time + ")(" + statesNames.get(state) + ") = 1.0");
+				System.out.println("beta(" + (time - 1) + ")(" + statesNames.get(state) + ") = 1.0");
 			}
 		}
-		SparseArray currentColumn = betaMatrix.getColumn(time - 1);
-		for (Couple cell : currentColumn) {
-			cell.setValue(cell.getValue() * factors[time - 1]);
-			if (debug) {
-				System.out.println("beta(" + time + ")(" + statesNames.get(cell.getX()) + ") scaled by a factor C = "
-						+ factors[time - 1] + " --> " + cell.getValue());
+		if (scaled) {
+			SparseArray currentColumn = betaMatrix.getColumn(time - 1);
+			for (Couple cell : currentColumn) {
+				cell.setValue(cell.getValue() * factors[time - 1]);
+				if (debug) {
+					System.out.println("beta(" + (time - 1) + ")(" + statesNames.get(cell.getX())
+							+ ") scaled by a factor C = " + factors[time - 1] + " --> " + cell.getValue());
+				}
 			}
 		}
 		if (debug) {
@@ -181,7 +183,7 @@ public class Formula {
 				StringBuilder summatory = null;
 				if (debug) {
 					summatory = new StringBuilder("");
-					summatory.append("beta(" + (t + 1) + ")(" + statesNames.get(i) + ") = ");
+					summatory.append("beta(" + t + ")(" + statesNames.get(i) + ") = ");
 				}
 				for (Couple cell : previousColumn) {
 					int state = cell.getX();
@@ -190,7 +192,7 @@ public class Formula {
 
 					if (debug) {
 						summatory.append("(" + a.getValue(i, state) + " x "
-								+ b[state].fi(sequence.getObservation(t + 1)) + " x beta(" + (t + 2) + ")("
+								+ b[state].fi(sequence.getObservation(t + 1)) + " x beta(" + (t + 1) + ")("
 								+ statesNames.get(state) + ") [" + betaMatrix.get(t + 1, state) + "]) + ");
 					}
 				}
@@ -207,12 +209,14 @@ public class Formula {
 				}
 				betaMatrix.setToValue(t, i, betaInduction);
 			}
-			currentColumn = betaMatrix.getColumn(t);
-			for (Couple cell : currentColumn) {
-				cell.setValue(cell.getValue() * factors[t]);
-				if (debug) {
-					System.out.println("beta(" + (t + 1) + ")(" + statesNames.get(cell.getX()) + ") scaled by a factor C = "
-							+ factors[t] + " --> " + cell.getValue());
+			if (scaled) {
+				SparseArray currentColumn = betaMatrix.getColumn(t);
+				for (Couple cell : currentColumn) {
+					cell.setValue(cell.getValue() * factors[t]);
+					if (debug) {
+						System.out.println("beta(" + t  + ")(" + statesNames.get(cell.getX())
+								+ ") scaled by a factor C = " + factors[t] + " --> " + cell.getValue());
+					}
 				}
 			}
 		}
@@ -236,9 +240,9 @@ public class Formula {
 			}
 		}
 		if (debug) {
-			summatory.deleteCharAt(summatory.length() - 1);
-			summatory.deleteCharAt(summatory.length() - 1);
-			summatory.deleteCharAt(summatory.length() - 1);
+			summatory.deleteCharAt(summatory.length() - 1); // Removes the last + and two spaces inserted
+			summatory.deleteCharAt(summatory.length() - 1); // in the last positions by the previous for-each
+			summatory.deleteCharAt(summatory.length() - 1); // tl;dr: text formatting
 			summatory.append(") = " + beta);
 			System.out.println(summatory.toString());
 		}
@@ -273,7 +277,7 @@ public class Formula {
 		SparseMatrix a = model.getA();
 		GaussianCurve[] b = model.getB();
 		double numerator = alphaMatrix.get(time, statei) * a.getValue(statei, statej)
-				* b[statej].fi(sequence.getObservation(time + 1) * betaMatrix.get(time + 1, statej));
+				* b[statej].fi(sequence.getObservation(time + 1)) * betaMatrix.get(time + 1, statej);
 		if (Double.compare(numerator, 0.0) == 0) {
 			return 0.0;
 		} else {
@@ -281,7 +285,7 @@ public class Formula {
 			for (int i = 0; i < numberOfStates; i++) {
 				for (int j = 0; j < numberOfStates; j++) {
 					denominator += alphaMatrix.get(time, i) * a.getValue(i, j)
-							* b[j].fi(sequence.getObservation(time + 1) * betaMatrix.get(time + 1, j));
+							* b[j].fi(sequence.getObservation(time + 1)) * betaMatrix.get(time + 1, j);
 				}
 			}
 			return numerator / denominator;
