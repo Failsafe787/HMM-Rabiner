@@ -7,12 +7,12 @@ This is a university project I'm developing for an exam. Many parts are incorrec
 ## State
 
 ### Current version
-Version 0.1.2 - February 15, 2018
+Version 0.1.3 - February 16, 2018
 
 Made with Eclipse Oxygen.2 and Java 9
 
 ### Functionalities
-- [x] Implementation of basic structures (Couple, Triplet, ...) inside utils package
+- [x] Implementation of basic structures (Couple, SparseArray, ...) inside utils package
 - [x] Implementation of Alpha, Beta, Gamma and Psi formulas
 - [x] Debug options for Alpha, Beta, Gamma and Psi formulas
 - [ ] Implementation of Viterbi algorithm
