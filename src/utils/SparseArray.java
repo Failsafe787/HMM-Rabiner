@@ -13,12 +13,12 @@ import java.util.Iterator;
 
 public class SparseArray implements Iterable<Couple> {
 
-	ArrayList<Couple> array;
-	Comparator<Couple> sorter;
-	int length;
+	private ArrayList<Couple> array;
+	private Comparator<Couple> sorter;
+	private int size;
 
-	public SparseArray(int length) {
-		this.length = length;
+	public SparseArray(int size) {
+		this.size = size;
 		array = new ArrayList<Couple>(); // Empty ArrayList, all the values are equal to 0
 		sorter = new Comparator<Couple>() { // Method used to keep the ArrayList ordered
 			@Override
@@ -34,8 +34,8 @@ public class SparseArray implements Iterable<Couple> {
 		};
 	}
 
-	public int length() { // length getter
-		return length;
+	public int size() { // length getter
+		return size;
 	}
 
 	public int effectiveLength() { // returns the number of elements != 0 inside the SparseArray
@@ -43,7 +43,7 @@ public class SparseArray implements Iterable<Couple> {
 	}
 
 	public void setToValue(int x, double value) {
-		if (x >= length) {
+		if (x >= size) {
 			throw new IndexOutOfBoundsException();
 		}
 		if (Double.compare(value, 0.0) == 0) { // If value is 0.0, a remove operation must be executed instead of
@@ -67,7 +67,7 @@ public class SparseArray implements Iterable<Couple> {
 	}
 
 	public boolean setToZero(int x) { // Sets the cell in position [X] to 0.0 (equals to removing it from the array)
-		if (x >= length) {
+		if (x >= size) {
 			throw new IndexOutOfBoundsException();
 		}
 		if (!isZero(x)) { // if the cell exists, remove it
@@ -78,7 +78,7 @@ public class SparseArray implements Iterable<Couple> {
 	}
 
 	public double getValue(int x) {
-		if (x >= length) {
+		if (x >= size) {
 			throw new IndexOutOfBoundsException();
 		}
 		for (Couple cell : array) {
@@ -92,7 +92,7 @@ public class SparseArray implements Iterable<Couple> {
 	}
 
 	public Couple getCell(int x) {
-		if (x >= length) {
+		if (x >= size) {
 			throw new IndexOutOfBoundsException();
 		}
 		for (Couple cell : array) {
@@ -114,10 +114,12 @@ public class SparseArray implements Iterable<Couple> {
 		StringBuilder stringbuilded = new StringBuilder("");
 		stringbuilded.append("{");
 		int i;
-		for (i = 0; i < array.size() - 1; i++) {
+		for (i = 0; i < array.size(); i++) {
 			stringbuilded.append(array.get(i).toString() + ",");
 		}
-		stringbuilded.append(array.get(i).toString());
+		if (i > 0) {
+			stringbuilded.deleteCharAt(stringbuilded.length() - 1);
+		}
 		stringbuilded.append("}");
 		return stringbuilded.toString();
 	}

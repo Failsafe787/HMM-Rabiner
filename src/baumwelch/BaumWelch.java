@@ -16,7 +16,6 @@ import utils.Couple;
 import utils.GaussianCurve;
 import utils.SparseArray;
 import utils.SparseMatrix;
-import utils.Triplet;
 
 public class BaumWelch {
 
@@ -79,22 +78,24 @@ public class BaumWelch {
 				// BEGIN of A re-estimation
 				SparseMatrix a = currentModel.getA();
 				SparseMatrix newA = container.getA();
-				for (Triplet cell : a) {
-					double value = 0.0;
-					double numerator = 0.0;
-					for (int t = 0; t < sequence.size() - 1; t++) {
-						numerator += Formula.psi(currentModel, container, sequence, cell.getX(), cell.getY(), t);
-					}
-					if (Double.compare(numerator, 0.0) != 0) {
-						double denominator = 0.0;
+				int columnNumber = 0;
+				for(SparseArray column : a) {
+					for (Couple cell : column) {
+						double value = 0.0;
+						double numerator = 0.0;
 						for (int t = 0; t < sequence.size() - 1; t++) {
-							numerator += Formula.gamma(currentModel, container, cell.getX(), t);
+							numerator += Formula.psi(currentModel, container, sequence, columnNumber, cell.getX(), t);
 						}
-						value = numerator / denominator;
+						if (Double.compare(numerator, 0.0) != 0) {
+							double denominator = 0.0;
+							for (int t = 0; t < sequence.size() - 1; t++) {
+								numerator += Formula.gamma(currentModel, container, columnNumber, t);
+							}
+							value = numerator / denominator;
+						}
+						newA.setToValue(columnNumber, cell.getX(), value);
 					}
-					newA.setToValue(cell.getX(), cell.getY(), value);
 				}
-
 				// END of A re-estimation
 
 				// BEGIN of B re-estimation
@@ -163,10 +164,14 @@ public class BaumWelch {
 			weightedSum += alpha;
 
 			// BEGIN of A merging
-			for (Triplet cell : a) {
-				int x = cell.getX();
-				int y = cell.getY();
-				newA.setToValue(x, y, cell.getValue() + alpha * a.getValue(x, y));
+			int columnNumber = 0;
+			for(SparseArray column : a) {
+				for (Couple cell : column) {
+					int x = columnNumber;
+					int y = cell.getX();
+					newA.setToValue(x, y, cell.getValue() + alpha * a.getValue(x, y));
+				}
+				columnNumber++;
 			}
 			// END of A merging
 
@@ -183,8 +188,10 @@ public class BaumWelch {
 			// END of B merging
 		}
 		// A merging
-		for (Triplet cell : newA) {
-			cell.setValue(cell.getValue() / weightedSum);
+		for(SparseArray column : newA) {
+			for (Couple cell : column) {
+				cell.setValue(cell.getValue() / weightedSum);
+			}
 		}
 		// END of A merging
 

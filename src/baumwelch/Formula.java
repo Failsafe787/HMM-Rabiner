@@ -12,7 +12,6 @@ import utils.Couple;
 import utils.GaussianCurve;
 import utils.SparseMatrix;
 import utils.SparseArray;
-import utils.TemporalSparseMatrix;
 
 public class Formula {
 
@@ -22,7 +21,7 @@ public class Formula {
 		SparseMatrix a = model.getA();
 		GaussianCurve[] b = model.getB();
 		int numberOfStates = model.getNumberOfStates();
-		TemporalSparseMatrix alphaMatrix = container.getAlphaMatrix();
+		SparseMatrix alphaMatrix = container.getAlphaMatrix();
 		double[] factors = container.getScalingFactors();
 		double denominator = 0.0; // Used for scaling factor computation
 		int time = sequence.size();
@@ -149,7 +148,7 @@ public class Formula {
 		SparseMatrix a = model.getA();
 		GaussianCurve[] b = model.getB();
 		int numberOfStates = model.getNumberOfStates();
-		TemporalSparseMatrix betaMatrix = container.getBetaMatrix();
+		SparseMatrix betaMatrix = container.getBetaMatrix();
 		double[] factors = container.getScalingFactors(); // Alpha method must be executed before this!
 		int time = sequence.size();
 		ArrayList<String> statesNames = null;
@@ -188,12 +187,12 @@ public class Formula {
 				for (Couple cell : previousColumn) {
 					int state = cell.getX();
 					betaInduction += a.getValue(i, state) * b[state].fi(sequence.getObservation(t + 1))
-							* betaMatrix.get(t + 1, state);
+							* betaMatrix.getValue(t + 1, state);
 
 					if (debug) {
 						summatory.append("(" + a.getValue(i, state) + " x "
 								+ b[state].fi(sequence.getObservation(t + 1)) + " x beta(" + (t + 1) + ")("
-								+ statesNames.get(state) + ") [" + betaMatrix.get(t + 1, state) + "]) + ");
+								+ statesNames.get(state) + ") [" + betaMatrix.getValue(t + 1, state) + "]) + ");
 					}
 				}
 				if (debug) {
@@ -252,15 +251,15 @@ public class Formula {
 
 	public static double gamma(ContinuousModel model, BWContainer container, int state, int time) {
 		int numberOfStates = model.getNumberOfStates();
-		TemporalSparseMatrix alphaMatrix = container.getAlphaMatrix();
-		TemporalSparseMatrix betaMatrix = container.getBetaMatrix();
-		double numerator = alphaMatrix.get(time, state) * betaMatrix.get(time, state);
+		SparseMatrix alphaMatrix = container.getAlphaMatrix();
+		SparseMatrix betaMatrix = container.getBetaMatrix();
+		double numerator = alphaMatrix.getValue(time, state) * betaMatrix.getValue(time, state);
 		if (Double.compare(numerator, 0.0) == 0) {
 			return 0.0;
 		} else {
 			double denominator = 0.0;
 			for (int i = 0; i < numberOfStates; i++) {
-				denominator += alphaMatrix.get(time, i) * betaMatrix.get(time, i);
+				denominator += alphaMatrix.getValue(time, i) * betaMatrix.getValue(time, i);
 			}
 			return numerator / denominator;
 		}
@@ -268,24 +267,24 @@ public class Formula {
 
 	public static double psi(ContinuousModel model, BWContainer container, ObsSequence sequence, int statei, int statej,
 			int time) {
-		TemporalSparseMatrix alphaMatrix = container.getAlphaMatrix();
-		TemporalSparseMatrix betaMatrix = container.getBetaMatrix();
+		SparseMatrix alphaMatrix = container.getAlphaMatrix();
+		SparseMatrix betaMatrix = container.getBetaMatrix();
 		if (time >= sequence.size() - 1) {
 			return 0.0;
 		}
 		int numberOfStates = model.getNumberOfStates();
 		SparseMatrix a = model.getA();
 		GaussianCurve[] b = model.getB();
-		double numerator = alphaMatrix.get(time, statei) * a.getValue(statei, statej)
-				* b[statej].fi(sequence.getObservation(time + 1)) * betaMatrix.get(time + 1, statej);
+		double numerator = alphaMatrix.getValue(time, statei) * a.getValue(statei, statej)
+				* b[statej].fi(sequence.getObservation(time + 1)) * betaMatrix.getValue(time + 1, statej);
 		if (Double.compare(numerator, 0.0) == 0) {
 			return 0.0;
 		} else {
 			double denominator = 0.0;
 			for (int i = 0; i < numberOfStates; i++) {
 				for (int j = 0; j < numberOfStates; j++) {
-					denominator += alphaMatrix.get(time, i) * a.getValue(i, j)
-							* b[j].fi(sequence.getObservation(time + 1)) * betaMatrix.get(time + 1, j);
+					denominator += alphaMatrix.getValue(time, i) * a.getValue(i, j)
+							* b[j].fi(sequence.getObservation(time + 1)) * betaMatrix.getValue(time + 1, j);
 				}
 			}
 			return numerator / denominator;

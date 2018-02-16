@@ -23,7 +23,6 @@ import utils.Couple;
 import utils.GaussianCurve;
 import utils.SparseMatrix;
 import utils.SparseArray;
-import utils.Triplet;
 
 public class ContinuousModel {
 
@@ -42,7 +41,7 @@ public class ContinuousModel {
 		if (nStates != b.length) {
 			throw new IllegalBDefinitionException();
 		}
-		if (nStates != pi.length()) {
+		if (nStates != pi.size()) {
 			throw new IllegalPiDefinitionException();
 		}
 		if (nStates != statesNames.size()) {
@@ -106,15 +105,32 @@ public class ContinuousModel {
 
 	public void randomize() {
 		Random randomgen = new Random(); // This need to be replaced with a probability generator
-		for (Couple cell : pi) {
-			cell.setValue(randomgen.nextDouble());
-		}
-		for (Triplet cell : a) {
-			cell.setValue(randomgen.nextDouble());
+		double probabilitySum = 1.0; // Probability left to assign
+		probabilityFiller(pi,"pi");
+		for (SparseArray column : a) {
+			probabilityFiller(column,"a");
 		}
 		for (GaussianCurve curve : b) {
 			curve.setMu(randomgen.nextDouble());
 			curve.setSigma(randomgen.nextDouble());
+		}
+	}
+	
+	private void probabilityFiller(SparseArray array, String test) {
+		Random randomgen = new Random(); // This need to be replaced with a probability generator
+		double probabilitySum = 1.0; // Probability left to assign
+		for (int i = 0; i < array.effectiveLength(); i++) {
+			Couple cell = array.getCell(i);
+			if (i < array.effectiveLength() - 1) {
+				double generatedProbability;
+				while ((generatedProbability = randomgen.nextDouble()) > probabilitySum); 
+				// Keeps generating values compatible with the probability left
+				System.out.println(test + " - " + probabilitySum + " vs " + generatedProbability);
+				cell.setValue(generatedProbability);
+				probabilitySum -= generatedProbability;
+			} else {
+				cell.setValue(probabilitySum); // Last element, assign remaining percentage of probability
+			}
 		}
 	}
 
@@ -273,9 +289,13 @@ public class ContinuousModel {
 
 	private void writeStatesTransitions(String path) {
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(path))) {
-			for (Triplet matrixState : a) { // Writes A
-				bw.write(statesName.get(matrixState.getX()) + "\t" + statesName.get(matrixState.getY()) + "\t"
-						+ matrixState.getValue() + "\n");
+			int columnNumber = 0;
+			for (SparseArray column : a) { // Writes A
+				for (Couple matrixState : column) {
+					bw.write(statesName.get(columnNumber) + "\t" + statesName.get(matrixState.getX()) + "\t"
+							+ matrixState.getValue() + "\n");
+				}
+				columnNumber++;
 			}
 		} catch (FileNotFoundException e) {
 			System.out.println("File " + path + " has not been found!");

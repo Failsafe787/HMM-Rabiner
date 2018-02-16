@@ -62,14 +62,14 @@ public class SparseMatrixTest {
 		assertTrue(Double.compare(test.getValue(1, 0), 0.345) == 0);
 		test.setToValue(5, 17, 0.1);
 		assertTrue(Double.compare(test.getValue(5, 17), 0.1) == 0);
-		assertTrue(test.toString().equals("{[1, 0, 0.345],[5, 17, 0.1]}"));
+		assertTrue(test.toString().equals("{{},{[0, 0.345]},{},{},{},{[17, 0.1]},{},{},{},{},{},{},{},{},{},{},{},{},{},{}}"));
 		test.setToZero(5, 17);
 		test.setToZero(1, 0);
 		test.setToValue(5, 17, 0.1);
 		assertTrue(Double.compare(test.getValue(5, 17), 0.1) == 0);
 		test.setToValue(1, 0, 0.345);
 		assertTrue(Double.compare(test.getValue(1, 0), 0.345) == 0);
-		assertTrue(test.toString().equals("{[1, 0, 0.345],[5, 17, 0.1]}"));
+		assertTrue(test.toString().equals("{{},{[0, 0.345]},{},{},{},{[17, 0.1]},{},{},{},{},{},{},{},{},{},{},{},{},{},{}}"));
 	}
 
 }

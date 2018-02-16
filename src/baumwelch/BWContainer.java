@@ -9,7 +9,6 @@ package baumwelch;
 import utils.GaussianCurve;
 import utils.SparseArray;
 import utils.SparseMatrix;
-import utils.TemporalSparseMatrix;
 
 public class BWContainer {
 
@@ -19,8 +18,8 @@ public class BWContainer {
 	// alongside all the partial models structures ( pi, a and b matrices). 
 	// Everything is dependent from the observed sequence, which must be provided
 	
-	private TemporalSparseMatrix alphaMatrix;
-	private TemporalSparseMatrix betaMatrix;
+	private SparseMatrix alphaMatrix;
+	private SparseMatrix betaMatrix;
 	private SparseArray pi;
 	private SparseMatrix a;
 	private GaussianCurve[] b;
@@ -29,8 +28,8 @@ public class BWContainer {
 	
 	
 	public BWContainer(int nStates, int sequenceSize) { // Builds an set of empty structures in order to save them
-		alphaMatrix = new TemporalSparseMatrix(sequenceSize,nStates);
-		betaMatrix = new TemporalSparseMatrix(sequenceSize,nStates);
+		alphaMatrix = new SparseMatrix(sequenceSize,nStates);
+		betaMatrix = new SparseMatrix(sequenceSize,nStates);
 		pi = new SparseArray(nStates);
 		a = new SparseMatrix(nStates,nStates);
 		b = new GaussianCurve[nStates];
@@ -43,11 +42,11 @@ public class BWContainer {
 		}
 	}
 	
-	public TemporalSparseMatrix getAlphaMatrix() {
+	public SparseMatrix getAlphaMatrix() {
 		return alphaMatrix;
 	}
 	
-	public TemporalSparseMatrix getBetaMatrix() {
+	public SparseMatrix getBetaMatrix() {
 		return betaMatrix;
 	}
 	
