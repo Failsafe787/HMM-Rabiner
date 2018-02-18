@@ -14,6 +14,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import exceptions.IllegalADefinitionException;
 import exceptions.IllegalBDefinitionException;
@@ -21,6 +23,7 @@ import exceptions.IllegalPiDefinitionException;
 import exceptions.IllegalStatesNamesSizeException;
 import utils.Couple;
 import utils.GaussianCurve;
+import utils.Log;
 import utils.SparseMatrix;
 import utils.SparseArray;
 
@@ -31,6 +34,7 @@ public class ContinuousModel {
 	private SparseArray pi;
 	private ArrayList<String> statesName;
 	private int nStates;
+	private Logger logger = Log.getLogger();
 
 	public ContinuousModel(int nStates, SparseMatrix a, GaussianCurve[] b, SparseArray pi,
 			ArrayList<String> statesNames) throws IllegalStatesNamesSizeException, IllegalADefinitionException,
@@ -103,19 +107,35 @@ public class ContinuousModel {
 		this.pi = pi;
 	}
 
-	public void randomize() {
-		Random randomgen = new Random(); // This need to be replaced with a probability generator
-		double probabilitySum = 1.0; // Probability left to assign
-		probabilityFiller(pi,"pi");
+	public void randomizePi() { // Takes a polarizedValue for Mu and Sigma values generator (this value is used
+								// as base for Mu and Sigma)
+		probabilityFiller(pi, "pi");
+	}
+
+	public void randomizeA() {
 		for (SparseArray column : a) {
-			probabilityFiller(column,"a");
-		}
-		for (GaussianCurve curve : b) {
-			curve.setMu(randomgen.nextDouble());
-			curve.setSigma(randomgen.nextDouble());
+			probabilityFiller(column, "a");
 		}
 	}
-	
+
+	public void randomizeB(double polarizedValue) {
+		Random randomgen = new Random(); // This need to be replaced with a probability generator
+		for (GaussianCurve curve : b) {
+			if(polarizedValue > 1) {
+				int sign = randomgen.nextBoolean() ? -1 : 1; // Used to generate +-
+				curve.setMu(polarizedValue + sign * randomgen.nextDouble()); // java.util.random doesn't provide a
+																			 // nextDouble(min_value, max_value) method
+																			 // in Java 9
+				sign = randomgen.nextBoolean() ? -1 : 1;
+				curve.setSigma(polarizedValue + sign * randomgen.nextDouble());
+			}
+			else {
+				curve.setMu(randomgen.nextDouble());
+				curve.setSigma(randomgen.nextDouble());
+			}
+		}
+	}
+
 	private void probabilityFiller(SparseArray array, String test) {
 		Random randomgen = new Random(); // This need to be replaced with a probability generator
 		double probabilitySum = 1.0; // Probability left to assign
@@ -123,9 +143,10 @@ public class ContinuousModel {
 			Couple cell = array.getCell(i);
 			if (i < array.effectiveLength() - 1) {
 				double generatedProbability;
-				while ((generatedProbability = randomgen.nextDouble()) > probabilitySum); 
+				while ((generatedProbability = randomgen.nextDouble()) > probabilitySum)
+					;
 				// Keeps generating values compatible with the probability left
-				System.out.println(test + " - " + probabilitySum + " vs " + generatedProbability);
+				logger.log(Level.INFO, test + " - " + probabilitySum + " vs " + generatedProbability);
 				cell.setValue(generatedProbability);
 				probabilitySum -= generatedProbability;
 			} else {
@@ -171,9 +192,9 @@ public class ContinuousModel {
 				throw new IllegalPiDefinitionException();
 			}
 		} catch (FileNotFoundException e) {
-			System.out.println("File " + path + " has not been found!");
+			logger.log(Level.WARNING, "File " + path + " has not been found!");
 		} catch (IOException e) {
-			System.out.println("There was an IO error while reading " + path);
+			logger.log(Level.WARNING, "There was an IO error while reading " + path);
 		}
 
 	}
@@ -212,14 +233,13 @@ public class ContinuousModel {
 					a.setToValue(x, y, Double.parseDouble(tuple[2])); // x-1 and y-1 means we've to consider the
 																		// presence of the INIT state
 				} else {
-					System.out
-							.println("[Skipped] There was an error while reading line " + linePosition + " in " + path);
+					logger.log(Level.WARNING, "There was an error while reading line " + linePosition + " in " + path);
 				}
 			}
 		} catch (FileNotFoundException e) {
-			System.out.println("File " + path + " has not been found!");
+			logger.log(Level.WARNING, "File " + path + " has not been found!");
 		} catch (IOException e) {
-			System.out.println("There was an IO error while reading " + path);
+			logger.log(Level.WARNING, "There was an IO error while reading " + path);
 		}
 	}
 
@@ -261,10 +281,10 @@ public class ContinuousModel {
 			}
 			return valid;
 		} catch (FileNotFoundException e) {
-			System.out.println("File " + path + " has not been found!");
+			logger.log(Level.WARNING, "File " + path + " has not been found!");
 			return false;
 		} catch (IOException e) {
-			System.out.println("There was an IO error while reading " + path);
+			logger.log(Level.WARNING, "There was an IO error while reading " + path);
 			return false;
 		}
 	}
@@ -281,9 +301,9 @@ public class ContinuousModel {
 				bw.write(statesName.get(i) + "\t" + pi.getValue(statesName.indexOf(statesName.get(i))) + "\n");
 			}
 		} catch (FileNotFoundException e) {
-			System.out.println("File " + path + " has not been found!");
+			logger.log(Level.WARNING, "File " + path + " has not been found!");
 		} catch (IOException e) {
-			System.out.println("There was an IO error while writing " + path);
+			logger.log(Level.WARNING, "There was an IO error while writing " + path);
 		}
 	}
 
@@ -298,9 +318,9 @@ public class ContinuousModel {
 				columnNumber++;
 			}
 		} catch (FileNotFoundException e) {
-			System.out.println("File " + path + " has not been found!");
+			logger.log(Level.WARNING, "File " + path + " has not been found!");
 		} catch (IOException e) {
-			System.out.println("There was an IO error while writing " + path);
+			logger.log(Level.WARNING, "There was an IO error while writing " + path);
 		}
 	}
 
@@ -311,9 +331,9 @@ public class ContinuousModel {
 				bw.write(statesName.get(i) + "\t" + curve.getMu() + "\t" + curve.getSigma() + "\n");
 			}
 		} catch (FileNotFoundException e) {
-			System.out.println("File " + path + " has not been found!");
+			logger.log(Level.WARNING, "File " + path + " has not been found!");
 		} catch (IOException e) {
-			System.out.println("There was an IO error while writing " + path);
+			logger.log(Level.WARNING, "There was an IO error while writing " + path);
 		}
 
 	}

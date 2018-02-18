@@ -7,13 +7,18 @@
 package baumwelch;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import utils.Couple;
 import utils.GaussianCurve;
+import utils.Log;
 import utils.SparseMatrix;
 import utils.SparseArray;
 
 public class Formula {
+
+	private static Logger logger = Log.getLogger();
 
 	public static double alpha(ContinuousModel model, BWContainer container, ObsSequence sequence, boolean scaled,
 			boolean debug) {
@@ -28,7 +33,7 @@ public class Formula {
 		ArrayList<String> statesNames = null; // Used for debug
 		if (debug) {
 			statesNames = model.getStatesNames();
-			System.out.println("\n[Initialization of alpha]");
+			logger.log(Level.INFO, "[Initialization of alpha]");
 		}
 		for (Couple cell : pi) { // Initialization
 			int state = cell.getX();
@@ -39,8 +44,8 @@ public class Formula {
 				denominator += pi1 * bi1;
 			}
 			if (debug) {
-				System.out
-						.println("alpha(0)(" + statesNames.get(state) + ") = " + pi1 + " x " + bi1 + " = " + pi1 * bi1);
+				logger.log(Level.INFO,
+						"alpha(0)(" + statesNames.get(state) + ") = " + pi1 + " x " + bi1 + " = " + pi1 * bi1);
 			}
 		}
 
@@ -51,15 +56,15 @@ public class Formula {
 				int state = cell.getX();
 				cell.setValue(cell.getValue() * factors[0]);
 				if (debug) {
-					System.out.println("alpha(0)(" + statesNames.get(state) + ") scaled by a factor C = " + factors[0]
-							+ " --> " + cell.getValue());
+					logger.log(Level.INFO, "alpha(0)(" + statesNames.get(state) + ") scaled by a factor C = "
+							+ factors[0] + " --> " + cell.getValue());
 				}
 			}
 			denominator = 0.0; // Reset for the inductive phase
 		}
 
 		if (debug) {
-			System.out.println("\n[Induction of alpha]");
+			logger.log(Level.INFO, "[Induction of alpha]");
 		}
 		for (int t = 1; t < time; t++) { // Induction
 			SparseArray previousColumn = alphaMatrix.getColumn(t - 1);
@@ -72,10 +77,14 @@ public class Formula {
 					summatory.append("(");
 				}
 				for (Couple cell : previousColumn) {
+					// System.out.println(a.toString());
+					// System.out.println(cell.getX() + " has value " + cell.getValue() + " and A("
+					// + cell.getX() + ")("
+					// + j + ") has value " + a.getValue(cell.getX(), j));
 					alphaInduction += cell.getValue() * a.getValue(cell.getX(), j);
 					if (debug) {
-						summatory.append("alpha(" + (t - 1) + ")(" + statesNames.get(cell.getX()) + ") [" + cell.getValue()
-								+ "] x " + a.getValue(cell.getX(), j) + " + ");
+						summatory.append("alpha(" + (t - 1) + ")(" + statesNames.get(cell.getX()) + ") ["
+								+ cell.getValue() + "] x " + a.getValue(cell.getX(), j) + " + ");
 					}
 				}
 				if (debug) {
@@ -96,7 +105,7 @@ public class Formula {
 				}
 				if (debug) {
 					summatory.append(" x " + bj + " = " + alphaInduction * bj);
-					System.out.println(summatory.toString());
+					logger.log(Level.INFO, summatory.toString());
 				}
 			}
 
@@ -107,7 +116,7 @@ public class Formula {
 					int state = cell.getX();
 					cell.setValue(cell.getValue() * factors[t]);
 					if (debug) {
-						System.out.println("alpha(" + t + ")(" + statesNames.get(state)
+						logger.log(Level.INFO, "[alpha(" + t + ")(" + statesNames.get(state)
 								+ ") scaled by a factor C = " + factors[t] + " --> " + cell.getValue());
 					}
 				}
@@ -115,7 +124,7 @@ public class Formula {
 			}
 		}
 		if (debug) {
-			System.out.println("\n[Termination of alpha]");
+			logger.log(Level.INFO, "[Termination of alpha]");
 		}
 		SparseArray currentColumn = alphaMatrix.getColumn(time - 1);
 		StringBuilder summatory = null;
@@ -138,7 +147,7 @@ public class Formula {
 			summatory.deleteCharAt(summatory.length() - 1);
 			summatory.deleteCharAt(summatory.length() - 1);
 			summatory.append(") = " + alpha);
-			System.out.println(summatory.toString());
+			logger.log(Level.INFO, summatory.toString());
 		}
 		return alpha;
 	}
@@ -153,13 +162,13 @@ public class Formula {
 		int time = sequence.size();
 		ArrayList<String> statesNames = null;
 		if (debug) {
-			System.out.println("\n[Initialization of beta]");
+			logger.log(Level.INFO, "[Initialization of beta]");
 			statesNames = model.getStatesNames();
 		}
 		for (int state = 0; state < numberOfStates; state++) { // Initialization
 			betaMatrix.setToValue(time - 1, state, 1.0);
 			if (debug) {
-				System.out.println("beta(" + (time - 1) + ")(" + statesNames.get(state) + ") = 1.0");
+				logger.log(Level.INFO, "beta(" + (time - 1) + ")(" + statesNames.get(state) + ") = 1.0");
 			}
 		}
 		if (scaled) {
@@ -167,13 +176,13 @@ public class Formula {
 			for (Couple cell : currentColumn) {
 				cell.setValue(cell.getValue() * factors[time - 1]);
 				if (debug) {
-					System.out.println("beta(" + (time - 1) + ")(" + statesNames.get(cell.getX())
+					logger.log(Level.INFO, "beta(" + (time - 1) + ")(" + statesNames.get(cell.getX())
 							+ ") scaled by a factor C = " + factors[time - 1] + " --> " + cell.getValue());
 				}
 			}
 		}
 		if (debug) {
-			System.out.println("\n[Induction of beta]");
+			logger.log(Level.INFO, "[Induction of beta]");
 		}
 		for (int t = time - 2; t >= 0; t--) { // Induction
 			SparseArray previousColumn = betaMatrix.getColumn(t + 1);
@@ -204,7 +213,7 @@ public class Formula {
 						summatory.deleteCharAt(summatory.length() - 1);
 						summatory.append(" = " + betaInduction);
 					}
-					System.out.println(summatory.toString());
+					logger.log(Level.INFO, summatory.toString());
 				}
 				betaMatrix.setToValue(t, i, betaInduction);
 			}
@@ -213,14 +222,14 @@ public class Formula {
 				for (Couple cell : currentColumn) {
 					cell.setValue(cell.getValue() * factors[t]);
 					if (debug) {
-						System.out.println("beta(" + t  + ")(" + statesNames.get(cell.getX())
+						logger.log(Level.INFO, "beta(" + t + ")(" + statesNames.get(cell.getX())
 								+ ") scaled by a factor C = " + factors[t] + " --> " + cell.getValue());
 					}
 				}
 			}
 		}
 		if (debug) {
-			System.out.println("\n[Termination of beta]");
+			logger.log(Level.INFO, "[Termination of beta]");
 		}
 		double beta = 0.0; // Termination
 		SparseArray finalColumn = betaMatrix.getColumn(0);
@@ -243,26 +252,46 @@ public class Formula {
 			summatory.deleteCharAt(summatory.length() - 1); // in the last positions by the previous for-each
 			summatory.deleteCharAt(summatory.length() - 1); // tl;dr: text formatting
 			summatory.append(") = " + beta);
-			System.out.println(summatory.toString());
+			logger.log(Level.INFO, summatory.toString());
 		}
 		return beta;
 
 	}
 
-	public static double gamma(ContinuousModel model, BWContainer container, int state, int time) {
+	public static double gamma(ContinuousModel model, BWContainer container, int time, int state, boolean debug) {
+		StringBuilder stringbuilded = null;
+		;
 		int numberOfStates = model.getNumberOfStates();
 		SparseMatrix alphaMatrix = container.getAlphaMatrix();
 		SparseMatrix betaMatrix = container.getBetaMatrix();
 		double numerator = alphaMatrix.getValue(time, state) * betaMatrix.getValue(time, state);
-		if (Double.compare(numerator, 0.0) == 0) {
-			return 0.0;
-		} else {
-			double denominator = 0.0;
-			for (int i = 0; i < numberOfStates; i++) {
-				denominator += alphaMatrix.getValue(time, i) * betaMatrix.getValue(time, i);
-			}
-			return numerator / denominator;
+		if (debug) {
+			stringbuilded = new StringBuilder();
+			stringbuilded.append("gamma(" + time + ")(" + state + ") = " + alphaMatrix.getValue(time, state) + " * "
+					+ betaMatrix.getValue(time, state));
 		}
+		double denominator = 0.0;
+		if (debug) {
+			stringbuilded.append(" / (");
+		}
+		for (int i = 0; i < numberOfStates; i++) {
+			denominator += alphaMatrix.getValue(time, i) * betaMatrix.getValue(time, i);
+			if (debug) {
+				stringbuilded
+						.append("(" + alphaMatrix.getValue(time, i) + " * " + betaMatrix.getValue(time, i) + ") + ");
+			}
+		}
+		if (debug) {
+			stringbuilded.deleteCharAt(stringbuilded.length() - 1);
+			stringbuilded.deleteCharAt(stringbuilded.length() - 1);
+			stringbuilded.deleteCharAt(stringbuilded.length() - 1);
+			stringbuilded.append(")");
+			logger.log(Level.INFO, stringbuilded.toString());
+		}
+		if (Double.compare(denominator, 0.0) == 0) {
+			throw new ArithmeticException("Can't divide by zero");
+		}
+		return numerator / denominator;
 	}
 
 	public static double psi(ContinuousModel model, BWContainer container, ObsSequence sequence, int statei, int statej,
@@ -270,6 +299,7 @@ public class Formula {
 		SparseMatrix alphaMatrix = container.getAlphaMatrix();
 		SparseMatrix betaMatrix = container.getBetaMatrix();
 		if (time >= sequence.size() - 1) {
+			logger.log(Level.WARNING, "Psi formula used with an inexistent state j, 0.0 returned!");
 			return 0.0;
 		}
 		int numberOfStates = model.getNumberOfStates();
@@ -277,18 +307,17 @@ public class Formula {
 		GaussianCurve[] b = model.getB();
 		double numerator = alphaMatrix.getValue(time, statei) * a.getValue(statei, statej)
 				* b[statej].fi(sequence.getObservation(time + 1)) * betaMatrix.getValue(time + 1, statej);
-		if (Double.compare(numerator, 0.0) == 0) {
-			return 0.0;
-		} else {
-			double denominator = 0.0;
-			for (int i = 0; i < numberOfStates; i++) {
-				for (int j = 0; j < numberOfStates; j++) {
-					denominator += alphaMatrix.getValue(time, i) * a.getValue(i, j)
-							* b[j].fi(sequence.getObservation(time + 1)) * betaMatrix.getValue(time + 1, j);
-				}
+		double denominator = 0.0;
+		for (int i = 0; i < numberOfStates; i++) {
+			for (int j = 0; j < numberOfStates; j++) {
+				denominator += alphaMatrix.getValue(time, i) * a.getValue(i, j)
+						* b[j].fi(sequence.getObservation(time + 1)) * betaMatrix.getValue(time + 1, j);
 			}
-			return numerator / denominator;
 		}
+		if (Double.compare(denominator, 0.0) == 0) {
+			throw new ArithmeticException("Can't divide by zero");
+		}
+		return numerator / denominator;
 	}
 
 }

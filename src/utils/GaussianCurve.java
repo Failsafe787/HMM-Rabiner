@@ -50,7 +50,6 @@ public class GaussianCurve {
 	}
 
 	public void setSigma(double sigma) { // set current sigma to the one provided
-		System.out.println(sigma);
 		if (Double.compare(sigma, 0.0) < 0 || Double.compare(sigma, 0.0) == 0) {
 			throw new IllegalArgumentException("Sigma cannot be less or equal to 0.0"); // Check if sigma is less or
 																						// equal to 0

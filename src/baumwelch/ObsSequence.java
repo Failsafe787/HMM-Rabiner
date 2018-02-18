@@ -12,6 +12,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import utils.Log;
 
 public class ObsSequence {
 
@@ -20,6 +24,7 @@ public class ObsSequence {
 	private ArrayList<Double> sequence;
 	public final static int VALUEANDSPACE = 1; // Format: V1 V2 V3 ... VN
 	public final static int VALUEPERLINE = 2; // Format: V1\nV2\nV3...\nVN
+	private Logger logger = Log.getLogger();
 
 	public ObsSequence() { // Empty sequence
 		sequence = new ArrayList<Double>();
@@ -50,7 +55,7 @@ public class ObsSequence {
 								valid = true;
 							}
 						} catch (NumberFormatException e) {
-							System.out.println("WARNING: There was an error while parsing \"" + line + "\". Skipped!");
+							logger.log(Level.WARNING, "There was an error while parsing \"" + line + "\". Skipped!");
 						}
 					} else if (fileFormat == 1) {
 						String[] values = line.split(" ");
@@ -61,33 +66,33 @@ public class ObsSequence {
 									finished = true; // stupid way of exiting here
 								}
 							} catch (NumberFormatException e) {
-								System.out.println(
-										"WARNING: There was an error while parsing \"" + values[i] + "\". Skipped!");
+								logger.log(Level.WARNING,
+										"There was an error while parsing \"" + values[i] + "\". Skipped!");
 							}
 						}
 					}
 
 				} catch (NumberFormatException e) {
-					System.out.println("WARNING: There was an error while parsing \"" + line + "\". Skipped!");
+					logger.log(Level.WARNING, "There was an error while parsing \"" + line + "\". Skipped!");
 				}
 			}
 			if (!finished && fileFormat == 1) {
-				System.out.println(
-						"WARNING: The file provided is invalid! Are you sure if it's in the format V1 V2 ... VN?");
+				logger.log(Level.WARNING,
+						"The file provided is invalid! Are you sure if it's in the format V1 V2 ... VN?");
 				sequence = null;
 			} else if (!valid && fileFormat == 2) {
-				System.out.println(
-						"WARNING: The file provided is invalid! Are you sure if it's in the format V1\\nV2\\n ... VN?");
+				logger.log(Level.WARNING,
+						"The file provided is invalid! Are you sure if it's in the format V1\\nV2\\n ... VN?");
 				sequence = null;
 			}
 		} catch (FileNotFoundException e) {
-			System.out.println("File " + pathName + " has not been found!");
+			logger.log(Level.WARNING, "File " + pathName + " has not been found!");
 			sequence = null;
 		} catch (IOException e) {
-			System.out.println("There was an IO error while reading " + pathName);
+			logger.log(Level.WARNING, "There was an IO error while reading " + pathName);
 			sequence = null;
 		} catch (Exception e) {
-			System.out.println("There was an error: " + e.getMessage());
+			logger.log(Level.WARNING, "There was an error: " + e.getMessage());
 			sequence = null;
 		}
 	}
@@ -126,6 +131,18 @@ public class ObsSequence {
 	public boolean setSequence(ArrayList<Double> sequence) { // Replaces the whole sequence with the one provided
 		this.sequence = sequence;
 		return true;
+	}
+
+	public double getMean() {
+		if (sequence.size() == 0) {
+			return 0.0;
+		} else {
+			double numerator = 0.0;
+			for (double value : sequence) {
+				numerator += value;
+			}
+			return numerator / sequence.size();
+		}
 	}
 
 	public int size() {
