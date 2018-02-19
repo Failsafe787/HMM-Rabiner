@@ -66,6 +66,14 @@ public class BWContainer {
 		return factors;
 	}
 	
+	public double getScaledProduct() {
+		double product = 1.0;
+		for(double factor : factors) {
+			product *= factor;
+		}
+		return product;
+	}
+	
 	public void setAlphaValue(double value) {
 		alphaValue = value;
 	}

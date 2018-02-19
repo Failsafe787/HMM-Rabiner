@@ -53,6 +53,7 @@ class BaumWelchTest {
 	public void testCreateC2() {
 		String path = "C:\\Users\\Luca Banzato\\Desktop\\test2\\balls";
 		Double[] values = { 0.0, 6.5, 17.8, 4.4 };
+		Double[] values2 = {15.8, 1.1, 43.6};
 		ObsSequence observation = new ObsSequence(values);
 		ArrayList<ObsSequence> al_observations = new ArrayList<ObsSequence>();
 		al_observations.add(observation);
@@ -74,7 +75,7 @@ class BaumWelchTest {
 		}
 		assertTrue(bw_test != null);
 		try {
-			bw_test.execute(path, true);
+			bw_test.execute(path, true, false);
 		} catch (IllegalStatesNamesSizeException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

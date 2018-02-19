@@ -7,7 +7,7 @@ This is a university project I'm developing for an exam. Many parts are incorrec
 ## State
 
 ### Current version
-Version 0.1.4 - Sunday, February 18, 2018
+Version 0.1.5 - Monday, February 19, 2018
 
 Made with Eclipse Oxygen.2 and Java 9
 

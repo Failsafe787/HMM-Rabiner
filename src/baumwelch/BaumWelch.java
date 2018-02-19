@@ -49,7 +49,7 @@ public class BaumWelch {
 	}
 
 	// Execute the BaumWelch algorithm
-	public ContinuousModel execute(String outputPath, boolean debug) throws IllegalStatesNamesSizeException,
+	public ContinuousModel execute(String outputPath, boolean scaled, boolean debug) throws IllegalStatesNamesSizeException,
 			IllegalADefinitionException, IllegalBDefinitionException, IllegalPiDefinitionException {
 		workingBench = new ArrayList<BWContainer>(); // Initialize a new "Working Bench" (ArrayList of BWContainers)
 		for (ObsSequence sequence : sequences) {
@@ -73,16 +73,19 @@ public class BaumWelch {
 																	// values)
 				}
 				logger.log(Level.INFO, "Associated Gaussian: " + Arrays.toString(currentModel.getB()));
-				double alpha = Formula.alpha(currentModel, container, sequence, true, true);
+				double alpha = Formula.alpha(currentModel, container, sequence, scaled, true);
 				likelihood *= alpha; // Updates the likelihood of the sequences created by this model
 				container.setAlphaValue(alpha); // Used later for models union
-				double beta = Formula.beta(currentModel, container, sequence, true, true);
+				double beta = Formula.beta(currentModel, container, sequence, scaled, true);
 
 				// BEGIN of Pi re-estimation
 				SparseArray pi = currentModel.getPi();
 				SparseArray newPi = container.getPi();
+				System.out.println("Alpha matrix before pi: " + container.getAlphaMatrix().toString());
+				System.out.println("Beta matrix before pi: " + container.getBetaMatrix().toString());
 				for (Couple cell : pi) {
 					newPi.setToValue(cell.getX(), Formula.gamma(currentModel, container, 0, cell.getX(), debug));
+					System.out.println("Value of Pi(" + cell.getX() + ") = " + Formula.gamma(currentModel, container, 0, cell.getX(), false));
 				}
 				// END of Pi re-estimation
 
@@ -106,12 +109,17 @@ public class BaumWelch {
 							throw new ArithmeticException("Can't divide by zero");
 						}
 						value = numerator / denominator;
+						if(scaled) {
+							//logger.log(Level.INFO, "Scaling down value of A(" + columnNumber + ")(" + cell.getX() + ") = " + value);
+							//value /= container.getScaledProduct();
+						}
 						logger.log(Level.INFO, "Value of A(" + columnNumber + ")(" + cell.getX() + ") = " + value);
 						newA.setToValue(columnNumber, cell.getX(), value);
 					}
 					columnNumber++;
 				}
 				// END of A re-estimation
+				
 
 				// BEGIN of B re-estimation
 				GaussianCurve[] b = currentModel.getB();
@@ -154,7 +162,7 @@ public class BaumWelch {
 				likelihood = currentLikelihood;
 			}
 			if (!convergent) {
-				currentModel = mergeModels(workingBench, currentModel.getNumberOfStates());
+				currentModel = mergeModels(workingBench, currentModel.getNumberOfStates(), scaled);
 			}
 			round++;
 			currentModel.writeToFiles(outputPath + "." + round);
@@ -163,9 +171,13 @@ public class BaumWelch {
 		return currentModel;
 	}
 
-	public ContinuousModel mergeModels(ArrayList<BWContainer> containers, int nStates)
+	public ContinuousModel mergeModels(ArrayList<BWContainer> containers, int nStates, boolean scaled)
 			throws IllegalStatesNamesSizeException, IllegalADefinitionException, IllegalBDefinitionException,
 			IllegalPiDefinitionException {
+		if(containers.size()==0) {
+			throw new IllegalArgumentException("There're no containers to merge, something is wrong!");
+		}
+		SparseArray newPi = null;
 		SparseMatrix newA = new SparseMatrix(nStates, nStates);
 		GaussianCurve[] newB = new GaussianCurve[nStates];
 		for (int i = 0; i < newB.length; i++) {
@@ -179,6 +191,12 @@ public class BaumWelch {
 			double alpha = container.getAlphaValue();
 			weightedSum += alpha;
 			// System.out.println("!" + containers.size() + " " + weightedSum);
+			
+			// BEGIN of PI merging
+			if(first) {
+				newPi = container.getPi(); // Pi isn't re-estimated, as stated on page 273 of Rabiner's paper
+			}
+			// END of PI merging
 
 			// BEGIN of A merging
 			int columnNumber = 0;
@@ -186,13 +204,11 @@ public class BaumWelch {
 				for (Couple cell : column) {
 					int x = columnNumber;
 					int y = cell.getX();
-					logger.log(Level.INFO, cell.getValue() + " " + alpha + " " + a.getValue(x, y));
-					newA.setToValue(x, y, cell.getValue() + alpha * a.getValue(x, y));
+					logger.log(Level.INFO, cell.getValue() + " " + alpha);
+					newA.setToValue(x, y, newA.getValue(x,y) + alpha * a.getValue(x, y));
 				}
 				columnNumber++;
 			}
-			//System.out.println("A: " + a.toString());
-			//System.out.println("newA: " + newA.toString());
 			// END of A merging
 
 			// BEGIN of B merging
@@ -206,6 +222,7 @@ public class BaumWelch {
 				}
 			}
 			// END of B merging
+			first = false;
 		}
 		// A merging
 		for (SparseArray column : newA) {
@@ -220,7 +237,7 @@ public class BaumWelch {
 			newB[i].setSigma(newB[i].getSigma() / weightedSum);
 		}
 
-		return new ContinuousModel(nStates, newA, newB, currentModel.getPi(), currentModel.getStatesNames());
+		return new ContinuousModel(nStates, newA, newB, newPi, currentModel.getStatesNames());
 
 	}
 }
