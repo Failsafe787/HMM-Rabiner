@@ -7,7 +7,7 @@ This is a university project I'm developing for an exam. Many parts are incorrec
 ## State
 
 ### Current version
-Version 0.1.5 - Monday, February 19, 2018
+Version 0.1.6 - Tuesday, February 20, 2018
 
 Made with Eclipse Oxygen.2 and Java 9
 
@@ -19,7 +19,7 @@ Made with Eclipse Oxygen.2 and Java 9
 - [x] Implementation of Continuous data observations
 - [x] Implementation of scaled versions of Alpha and Beta
 - [x] Implementation of Baum-Welch algorithm
-- [ ] Debug options for Alpha, Beta, Gamma and Psi formulas
+- [ ] Debug options for Baum-Welch algorithm
 - [ ] Implementation of the Main class
 
 ### Tests
