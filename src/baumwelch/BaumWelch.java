@@ -54,22 +54,17 @@ public class BaumWelch {
 		}
 	}
 
-	private void initialize() {
-		workingBench = new ArrayList<BWContainer>(); // Initialize a new "Working Bench" (ArrayList of BWContainers)
-		for (ObsSequence sequence : sequences) {
-			workingBench.add(new BWContainer(currentModel.getNumberOfStates(), sequence.size()));
-		}
-	}
-
 	// Execute the BaumWelch algorithm
 	public ContinuousModel step(String outputPath, boolean scaled, boolean debug)
 			throws IllegalStatesNamesSizeException, IllegalADefinitionException, IllegalBDefinitionException,
 			IllegalPiDefinitionException {
 		if (round == 0) {
-			initialize();
+			workingBench = new ArrayList<BWContainer>(); // Initialize a new "Working Bench" (ArrayList of BWContainers)
+			for (ObsSequence sequence : sequences) {
+				workingBench.add(new BWContainer(currentModel.getNumberOfStates(), sequence.size()));
+			}
 		}
-		double likelihood = 1.0; // Used for model evalutation
-		boolean convergent = false; // Cycle-breaker
+		double newLikelihood = 1.0; // Used for model evalutation
 
 		if (round == 0) { // Randomize
 			currentModel.randomizePi();
@@ -80,14 +75,13 @@ public class BaumWelch {
 			ObsSequence sequence = sequences.get(i);
 			if (round == 0) {
 				currentModel.randomizeB(sequence.getMean()); // Gaussians randomic values need to be polarized to
-																// the set (otherwise this approach produces many 0
-																// values)
+																// the set (otherwise many 0 values are calculated by
+																// the probability density function due to sigma and mu)
 			}
 			logger.log(Level.INFO, "Associated Gaussian: " + Arrays.toString(currentModel.getB()));
-			double alpha = Formula.alpha(currentModel, container, sequence, scaled, true);
-			likelihood *= alpha; // Updates the likelihood of the sequences created by this model
-			container.setAlphaValue(alpha); // Used later for models union
-			double beta = Formula.beta(currentModel, container, sequence, scaled, true);
+			Formula.alpha(currentModel, container, sequence, scaled, true);
+			newLikelihood *= container.getAlphaValue(); // Updates the likelihood of the sequences created by this model
+			Formula.beta(currentModel, container, sequence, scaled, true);
 
 			// BEGIN of Pi re-estimation
 			SparseArray pi = currentModel.getPi();
@@ -167,15 +161,17 @@ public class BaumWelch {
 			// END of B re-estimation
 		}
 		if (round > 0) { // likelihood of the test sequence must be evaluated with the previous one
-			if (currentLikelihood < likelihood) {
+			System.out.println("New likelihood: " + newLikelihood + " ||| Current likelihood: " + currentLikelihood);
+			if (currentLikelihood > newLikelihood) {
 				convergent = true;
 			}
-		} else { // first likelihood value assigned
-			likelihood = currentLikelihood;
 		}
+		currentLikelihood = newLikelihood;
 		currentModel = mergeModels(workingBench, currentModel.getNumberOfStates(), scaled);
 		round++;
-		currentModel.writeToFiles(outputPath + "." + round); // Save all the models in files which name is "example.round_number" (e.g. test.26.trans/curves/start)
+		currentModel.writeToFiles(outputPath + "." + round); // Save all the models in files which name is
+																// "example.round_number" (e.g.
+																// test.26.trans/curves/start)
 		System.gc(); // Garbage collection suggested
 		return currentModel;
 	}
@@ -212,7 +208,7 @@ public class BaumWelch {
 					int x = columnNumber;
 					int y = cell.getX();
 					logger.log(Level.INFO, cell.getValue() + " " + alpha);
-					newA.setToValue(x, y, newA.getValue(x, y) + alpha * a.getValue(x, y));
+					newA.setToValue(x, y, newA.getValue(x, y) + a.getValue(x, y));
 				}
 				columnNumber++;
 			}
@@ -221,15 +217,21 @@ public class BaumWelch {
 			// BEGIN of B merging
 			for (int i = 0; i < b.length; i++) {
 				if (first) {
-					newB[i].setMu(alpha * b[i].getMu());
-					newB[i].setSigma(alpha * b[i].getSigma());
+					newB[i].setMu(b[i].getMu());
+					newB[i].setSigma(b[i].getSigma());
 				} else {
-					newB[i].setMu(newB[i].getMu() + alpha * b[i].getMu());
-					newB[i].setSigma(newB[i].getSigma() + alpha * b[i].getSigma());
+					newB[i].setMu(newB[i].getMu() + b[i].getMu());
+					newB[i].setSigma(newB[i].getSigma() + b[i].getSigma());
 				}
 			}
 			// END of B merging
-			first = false;
+			if (first) {
+				first = false;
+			}
+		}
+		for (GaussianCurve curve : newB) {
+			curve.setMu(curve.getMu() / nStates);
+			curve.setSigma(curve.getSigma() / nStates);
 		}
 		return new ContinuousModel(nStates, newA, newB, newPi, currentModel.getStatesNames());
 
@@ -239,15 +241,15 @@ public class BaumWelch {
 		// steps has been done (currently 30)
 		return (convergent || round > 29);
 	}
-	
+
 	public int getCurrentRound() { // Returns the current round number
 		return round;
 	}
-	
+
 	public double getCurrentLikelihood() {
 		return currentLikelihood;
 	}
-	
+
 	public ContinuousModel getCurrentModel() {
 		return currentModel;
 	}

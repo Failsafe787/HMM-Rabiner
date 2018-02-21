@@ -6,7 +6,11 @@
 
 package baumwelch;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import utils.GaussianCurve;
+import utils.Log;
 import utils.SparseArray;
 import utils.SparseMatrix;
 
@@ -25,7 +29,8 @@ public class BWContainer {
 	private GaussianCurve[] b;
 	private double[] factors;
 	private double alphaValue = 0.0;
-	
+	private boolean isAlphaProcessed = false;
+	private Logger logger = Log.getLogger();
 	
 	public BWContainer(int nStates, int sequenceSize) { // Builds an set of empty structures in order to save them
 		alphaMatrix = new SparseMatrix(sequenceSize,nStates);
@@ -76,9 +81,14 @@ public class BWContainer {
 	
 	public void setAlphaValue(double value) {
 		alphaValue = value;
+		isAlphaProcessed = true;
 	}
 	
 	public double getAlphaValue() {
+		if(!isAlphaProcessed) {
+			logger.log(Level.WARNING, "Alpha matrix hasn't been computed, -1 is returned!");
+			return -1.0;
+		}
 		return alphaValue;
 	}
 	

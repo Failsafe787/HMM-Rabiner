@@ -20,7 +20,7 @@ public class Formula {
 
 	private static Logger logger = Log.getLogger();
 
-	public static double alpha(ContinuousModel model, BWContainer container, ObsSequence sequence, boolean scaled,
+	public static void alpha(ContinuousModel model, BWContainer container, ObsSequence sequence, boolean scaled,
 			boolean debug) {
 		SparseArray pi = model.getPi();
 		SparseMatrix a = model.getA();
@@ -135,11 +135,26 @@ public class Formula {
 				summatory.append("0.0");
 			}
 		}
-		double alpha = 0.0; // Termination
-		for (Couple cell : currentColumn) {
-			alpha += cell.getValue();
+		double alpha; // Termination
+		if(scaled) { // alpha scaled is 1/(product of all the scaling factors), as stated on formula 102 in Rabiner's paper
+			alpha = 1.0;
 			if (debug) {
-				summatory.append(cell.getValue() + " + ");
+				summatory.append("1 / ");
+			}
+			for(double factor : factors) {
+				alpha *= factor;
+				if (debug) {
+					summatory.append(factor + " * ");
+				}
+			}
+		}
+		else {
+			alpha = 0.0;
+			for (Couple cell : currentColumn) {
+				alpha += cell.getValue();
+				if (debug) {
+					summatory.append(cell.getValue() + " + ");
+				}
 			}
 		}
 		if (debug) {
@@ -149,10 +164,10 @@ public class Formula {
 			summatory.append(") = " + alpha);
 			logger.log(Level.INFO, summatory.toString());
 		}
-		return alpha;
+		container.setAlphaValue(alpha);
 	}
 
-	public static double beta(ContinuousModel model, BWContainer container, ObsSequence sequence, boolean scaled,
+	public static void beta(ContinuousModel model, BWContainer container, ObsSequence sequence, boolean scaled,
 			boolean debug) {
 		SparseMatrix a = model.getA();
 		GaussianCurve[] b = model.getB();
@@ -228,34 +243,6 @@ public class Formula {
 				}
 			}
 		}
-		if (debug) {
-			logger.log(Level.INFO, "[Termination of beta]");
-		}
-		double beta = 0.0; // Termination
-		SparseArray finalColumn = betaMatrix.getColumn(0);
-		StringBuilder summatory = null;
-		if (debug) {
-			summatory = new StringBuilder("");
-			summatory.append("beta = (");
-			if (finalColumn.effectiveLength() == 0) {
-				summatory.append("0.0");
-			}
-		}
-		for (Couple cell : finalColumn) {
-			beta += cell.getValue();
-			if (debug) {
-				summatory.append(cell.getValue() + " + ");
-			}
-		}
-		if (debug) {
-			summatory.deleteCharAt(summatory.length() - 1); // Removes the last + and two spaces inserted
-			summatory.deleteCharAt(summatory.length() - 1); // in the last positions by the previous for-each
-			summatory.deleteCharAt(summatory.length() - 1); // tl;dr: text formatting
-			summatory.append(") = " + beta);
-			logger.log(Level.INFO, summatory.toString());
-		}
-		return beta;
-
 	}
 
 	public static double gamma(ContinuousModel model, BWContainer container, int time, int state, boolean debug) {

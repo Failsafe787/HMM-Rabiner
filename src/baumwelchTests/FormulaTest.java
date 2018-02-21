@@ -44,9 +44,9 @@ class FormulaTest {
 		Double[] observations = { 0.384100, 3.022968, 1.920920, 0.384180 };
 		ObsSequence sequence = new ObsSequence(observations);
 		BWContainer container = new BWContainer(test.getNumberOfStates(), sequence.size());
-		double alphaValue = Formula.alpha(test, container, sequence, false, true);
+		Formula.alpha(test, container, sequence, false, true);
 		SparseMatrix alphaMatrix = container.getAlphaMatrix();
-		assertTrue(Double.compare(alphaValue, 1.334122388674474E-4) == 0);
+		assertTrue(Double.compare(container.getAlphaValue(), 1.334122388674474E-4) == 0);
 		//System.out.print(alphaMatrix.toStringMatrix());
 		assertTrue(Double.compare(alphaMatrix.getValue(0, 0), 0.18528647858278147) == 0);
 		assertTrue(Double.compare(alphaMatrix.getValue(0, 1), 0.026574007360815385) == 0);
@@ -80,8 +80,8 @@ class FormulaTest {
 		Double[] observations = { 0.384100, 3.022968, 1.920920, 0.384180 };
 		ObsSequence sequence = new ObsSequence(observations);
 		BWContainer container = new BWContainer(test.getNumberOfStates(), sequence.size());
-		double alphaValue = Formula.alpha(test, container, sequence, false, true);
-		double betaValue = Formula.beta(test, container, sequence, false, true);
+		Formula.alpha(test, container, sequence, false, true);
+		Formula.beta(test, container, sequence, false, true);
 		SparseMatrix betaMatrix = container.getBetaMatrix();
 		//System.out.print(betaMatrix.toStringMatrix());
 		assertTrue(Double.compare(betaMatrix.getValue(3, 0), 1.0) == 0);
@@ -92,7 +92,6 @@ class FormulaTest {
 		assertTrue(Double.compare(betaMatrix.getValue(1, 1), 0.007454842452420935) == 0);
 		assertTrue(Double.compare(betaMatrix.getValue(0, 0), 3.8570760353243675E-4) == 0);
 		assertTrue(Double.compare(betaMatrix.getValue(0, 1), 3.073982852043911E-4) == 0);
-		assertTrue(Double.compare(betaValue, 6.931058887368279E-4) == 0);
 	}
 
 	@Test
@@ -117,12 +116,11 @@ class FormulaTest {
 		Double[] observations = { 0.384100, 3.022968, 1.920920, 0.384180 };
 		ObsSequence sequence = new ObsSequence(observations);
 		BWContainer container = new BWContainer(test.getNumberOfStates(), sequence.size());
-		double alphaValue = Formula.alpha(test, container, sequence, false, false);
-		double betaValue = Formula.beta(test, container, sequence, false, false);
+		Formula.alpha(test, container, sequence, false, false);
+		Formula.beta(test, container, sequence, false, false);
 		double gammaValue = Formula.gamma(test, container, 3, 0, false);
 		double psiValue = Formula.psi(test, container, sequence, 0, 1, 2);
-		assertTrue(Double.compare(alphaValue, 1.334122388674474E-4) == 0);
-		assertTrue(Double.compare(betaValue, 6.931058887368279E-4) == 0);
+		assertTrue(Double.compare(container.getAlphaValue(), 1.334122388674474E-4) == 0);
 		assertTrue(Double.compare(gammaValue, 0.6353927781856177) == 0);
 		assertTrue(Double.compare(psiValue, 0.0903605851351128) == 0);
 	}
