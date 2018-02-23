@@ -1,7 +1,7 @@
 /*
  * Released under MIT License (Expat)
  * @author Luca Banzato
- * @version 0.1
+ * @version 0.1.8
  */
 
 package baumwelch;
@@ -76,6 +76,7 @@ public class ObsSequence {
 					logger.log(Level.WARNING, "There was an error while parsing \"" + line + "\". Skipped!");
 				}
 			}
+			br.close();
 			if (!finished && fileFormat == 1) {
 				logger.log(Level.WARNING,
 						"The file provided is invalid! Are you sure if it's in the format V1 V2 ... VN?");

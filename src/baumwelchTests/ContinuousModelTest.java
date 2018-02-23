@@ -1,7 +1,7 @@
 /*
  * Released under MIT License (Expat)
  * @author Luca Banzato
- * @version 0.1
+ * @version 0.1.8
  */
 
 package baumwelchTests;

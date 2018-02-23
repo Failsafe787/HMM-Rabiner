@@ -1,7 +1,7 @@
 /*
  * Released under MIT License (Expat)
  * @author Luca Banzato
- * @version 0.1
+ * @version 0.1.8
  */
 
 package baumwelch;
@@ -121,15 +121,15 @@ public class ContinuousModel {
 	public void randomizeB(double polarizedValue) {
 		Random randomgen = new Random(); // This need to be replaced with a probability generator
 		for (GaussianCurve curve : b) {
-			if(polarizedValue > 1) {
+			if (polarizedValue > 1) {
 				int sign = randomgen.nextBoolean() ? -1 : 1; // Used to generate +-
 				curve.setMu(polarizedValue + sign * randomgen.nextDouble()); // java.util.random doesn't provide a
-																			 // nextDouble(min_value, max_value) method
-																			 // in Java 9
+																				// nextDouble(min_value, max_value)
+																				// method
+																				// in Java 9
 				sign = randomgen.nextBoolean() ? -1 : 1;
 				curve.setSigma(polarizedValue + sign * randomgen.nextDouble());
-			}
-			else {
+			} else {
 				curve.setMu(randomgen.nextDouble());
 				curve.setSigma(randomgen.nextDouble());
 			}
@@ -146,7 +146,6 @@ public class ContinuousModel {
 				while ((generatedProbability = randomgen.nextDouble()) > probabilitySum)
 					;
 				// Keeps generating values compatible with the probability left
-				logger.log(Level.INFO, test + " - " + probabilitySum + " vs " + generatedProbability);
 				cell.setValue(generatedProbability);
 				probabilitySum -= generatedProbability;
 			} else {
@@ -176,18 +175,20 @@ public class ContinuousModel {
 					if (!statesName.contains(tuple[0])) { // Add the state to the states set (First state of rule)
 						statesName.add(tuple[0]);
 						if (statesName.size() > nStates) {
-							throw new IllegalStatesNamesSizeException();
+							throw new IllegalStatesNamesSizeException(
+									"The number of the states in PI isn't matching the number passed to the constructor!");
 						}
 						pi.setToValue(statesName.indexOf(tuple[0]), Double.parseDouble(tuple[1]));
 					} else {
-						throw new IllegalPiDefinitionException(); // State is already present, but that means a double
-																	// definition on pi!
+						throw new IllegalPiDefinitionException("A state in PI was declared more than one time!"); 
+						// State is already present, but that means  a double definition inside the file defining PI states
 					}
 					if (!valid) {
 						valid = true;
 					}
 				}
 			}
+			br.close();
 			if (!valid) { // Cannot read any sort of initial state or rule
 				throw new IllegalPiDefinitionException();
 			}
@@ -219,13 +220,15 @@ public class ContinuousModel {
 					if (!statesName.contains(tuple[0])) { // Add the state to the states set (First state of rule)
 						statesName.add(tuple[0]);
 						if (statesName.size() > nStates) {
-							throw new IllegalStatesNamesSizeException();
+							throw new IllegalStatesNamesSizeException(
+									"The number of the states in A isn't matching the number passed to the constructor!");
 						}
 					}
 					if (!statesName.contains(tuple[1])) { // Add the state to the states set (Second state of rule)
 						statesName.add(tuple[1]);
 						if (statesName.size() > nStates) {
-							throw new IllegalStatesNamesSizeException();
+							throw new IllegalStatesNamesSizeException(
+									"The number of the states in A isn't matching the number passed to the constructor!");
 						}
 					}
 					int x = statesName.indexOf(tuple[0]); // x lines (current state) for y columns (next state)
@@ -266,7 +269,8 @@ public class ContinuousModel {
 															// only if a state emits, but it's not reachable.
 						statesName.add(tuple[0]);
 						if (statesName.size() > nStates) {
-							throw new IllegalStatesNamesSizeException();
+							throw new IllegalStatesNamesSizeException(
+									"The number of the states in B isn't matching the number passed to the constructor!");
 						}
 					}
 					int x = statesName.indexOf(tuple[0]); // x lines (current state) for y columns (possible outcomes)
@@ -277,9 +281,8 @@ public class ContinuousModel {
 				}
 			}
 			if (!valid) { // Cannot read any sort of initial state or rule
-				throw new IllegalBDefinitionException();
+				throw new IllegalBDefinitionException("Cannot read any valid curve inside the specified file for B");
 			}
-			return valid;
 		} catch (FileNotFoundException e) {
 			logger.log(Level.WARNING, "File " + path + " has not been found!");
 			return false;
@@ -287,6 +290,14 @@ public class ContinuousModel {
 			logger.log(Level.WARNING, "There was an IO error while reading " + path);
 			return false;
 		}
+		for (GaussianCurve curve : b) {
+			if (curve == null) {
+				logger.log(Level.WARNING,
+						"The number of the curves declared in B isn't matching the number of states passed to the constructor!");
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public void writeToFiles(String pathName) {
@@ -300,6 +311,7 @@ public class ContinuousModel {
 			for (int i = 0; i < statesName.size(); i++) { // Writes A
 				bw.write(statesName.get(i) + "\t" + pi.getValue(statesName.indexOf(statesName.get(i))) + "\n");
 			}
+			bw.close();
 		} catch (FileNotFoundException e) {
 			logger.log(Level.WARNING, "File " + path + " has not been found!");
 		} catch (IOException e) {

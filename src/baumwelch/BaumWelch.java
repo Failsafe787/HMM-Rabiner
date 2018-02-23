@@ -1,7 +1,7 @@
 /*
  * Released under MIT License (Expat)
  * @author Luca Banzato
- * @version 0.1
+ * @version 0.1.8
  */
 
 package baumwelch;
@@ -34,8 +34,9 @@ public class BaumWelch {
 	private boolean convergent = false;
 
 	// Constructor without a model already prepared
-	public BaumWelch(int nStates, String path, ArrayList<ObsSequence> sequences) throws IllegalPiDefinitionException,
-			IllegalADefinitionException, IllegalBDefinitionException, IllegalStatesNamesSizeException {
+	public BaumWelch(int nStates, String path, ArrayList<ObsSequence> sequences, boolean debug)
+			throws IllegalPiDefinitionException, IllegalADefinitionException, IllegalBDefinitionException,
+			IllegalStatesNamesSizeException {
 		currentModel = new ContinuousModel(nStates, path);
 		if (sequences != null && sequences.size() > 0) {
 			this.sequences = sequences;
@@ -58,17 +59,26 @@ public class BaumWelch {
 	public ContinuousModel step(String outputPath, boolean scaled, boolean debug)
 			throws IllegalStatesNamesSizeException, IllegalADefinitionException, IllegalBDefinitionException,
 			IllegalPiDefinitionException {
+
+		if (debug) {
+			logger.log(Level.INFO, "===== Round " + round + " ===== ");
+		}
+
+		double newLikelihood = 1.0; // Used for model evalutation
+
 		if (round == 0) {
+			currentModel.randomizePi();
+			currentModel.randomizeA();
 			workingBench = new ArrayList<BWContainer>(); // Initialize a new "Working Bench" (ArrayList of BWContainers)
 			for (ObsSequence sequence : sequences) {
 				workingBench.add(new BWContainer(currentModel.getNumberOfStates(), sequence.size()));
 			}
-		}
-		double newLikelihood = 1.0; // Used for model evalutation
-
-		if (round == 0) { // Randomize
-			currentModel.randomizePi();
-			currentModel.randomizeA();
+			if (debug) {
+				logger.log(Level.INFO, "Containers initialized");
+				logger.log(Level.INFO, "PI and A randomized");
+				logger.log(Level.INFO, "Pi: " + currentModel.getPi().toString());
+				logger.log(Level.INFO, "A: \n" + currentModel.getA().toStringMatrix());
+			}
 		}
 		for (int i = 0; i < sequences.size(); i++) {
 			BWContainer container = workingBench.get(i); // Keeps all the A/B/Pi values in an object
@@ -77,21 +87,32 @@ public class BaumWelch {
 				currentModel.randomizeB(sequence.getMean()); // Gaussians randomic values need to be polarized to
 																// the set (otherwise many 0 values are calculated by
 																// the probability density function due to sigma and mu)
+				if (debug) {
+					logger.log(Level.INFO, "B: " + Arrays.toString(currentModel.getB()));
+				}
 			}
-			logger.log(Level.INFO, "Associated Gaussian: " + Arrays.toString(currentModel.getB()));
 			Formula.alpha(currentModel, container, sequence, scaled, true);
 			newLikelihood *= container.getAlphaValue(); // Updates the likelihood of the sequences created by this model
 			Formula.beta(currentModel, container, sequence, scaled, true);
+			if (debug) {
+				logger.log(Level.INFO,
+						"\nAlpha Matrix obtained (from t=0 to T):\n" + container.getAlphaMatrix().toStringMatrix());
+				logger.log(Level.INFO,
+						"\nBeta Matrix obtained (from t=0 to T):\n" + container.getBetaMatrix().toStringMatrix());
+				logger.log(Level.INFO, "\nCurrent Pi: " + currentModel.getPi().toString());
+				logger.log(Level.INFO, "\nCurrent A:\n" + currentModel.getA().toString());
+				logger.log(Level.INFO, "\n\n------ Re-estimation ------");
+			}
 
 			// BEGIN of Pi re-estimation
 			SparseArray pi = currentModel.getPi();
 			SparseArray newPi = container.getPi();
-			System.out.println("Alpha matrix before pi: " + container.getAlphaMatrix().toString());
-			System.out.println("Beta matrix before pi: " + container.getBetaMatrix().toString());
 			for (Couple cell : pi) {
-				newPi.setToValue(cell.getX(), Formula.gamma(currentModel, container, 0, cell.getX(), debug));
-				System.out.println("Value of Pi(" + cell.getX() + ") = "
-						+ Formula.gamma(currentModel, container, 0, cell.getX(), false));
+				newPi.setToValue(cell.getX(), Formula.gamma(currentModel, container, 0, cell.getX(), false));
+				if (debug) {
+					logger.log(Level.INFO, "Value of new Pi(" + cell.getX() + ") = "
+							+ Formula.gamma(currentModel, container, 0, cell.getX(), false) + "\n");
+				}
 			}
 			// END of Pi re-estimation
 
@@ -100,27 +121,52 @@ public class BaumWelch {
 			// System.out.println("A getted:" + a.toString());
 			SparseMatrix newA = container.getA();
 			int columnNumber = 0;
+			StringBuilder formulaLog = null;
+			if (debug) {
+				formulaLog = new StringBuilder();
+				formulaLog.append("(");
+			}
 			for (SparseArray column : a) {
 				for (Couple cell : column) {
 					double value = 0.0;
 					double numerator = 0.0;
 					for (int t = 0; t < sequence.size() - 2; t++) { // From 1 to T-1 (in Rabiner's formula, 40b)
-						numerator += Formula.psi(currentModel, container, sequence, columnNumber, cell.getX(), t);
+						numerator += Formula.psi(currentModel, container, sequence, columnNumber, cell.getX(), t,
+								false);
+						if (debug) {
+							formulaLog.append(
+									Formula.psi(currentModel, container, sequence, columnNumber, cell.getX(), t, false)
+											+ " + ");
+						}
 					}
 					double denominator = 0.0;
+					if (debug) {
+						formulaLog.deleteCharAt(formulaLog.length() - 1);
+						formulaLog.deleteCharAt(formulaLog.length() - 1);
+						formulaLog.deleteCharAt(formulaLog.length() - 1);
+						formulaLog.append(") / (");
+					}
 					for (int t = 0; t < sequence.size() - 2; t++) { // From 1 to T-1 (in Rabiner's formula, 40b)
-						denominator += Formula.gamma(currentModel, container, t, columnNumber, debug);
+						denominator += Formula.gamma(currentModel, container, t, columnNumber, false);
+						if (debug) {
+							formulaLog.append(Formula.gamma(currentModel, container, t, columnNumber, false) + " + ");
+						}
+					}
+					if (debug) {
+						formulaLog.deleteCharAt(formulaLog.length() - 1);
+						formulaLog.deleteCharAt(formulaLog.length() - 1);
+						formulaLog.deleteCharAt(formulaLog.length() - 1);
+						formulaLog.append(")");
 					}
 					if (Double.compare(denominator, 0.0) == 0) {
 						throw new ArithmeticException("Can't divide by zero");
 					}
 					value = numerator / denominator;
-					if (scaled) {
-						// logger.log(Level.INFO, "Scaling down value of A(" + columnNumber + ")(" +
-						// cell.getX() + ") = " + value);
-						// value /= container.getScaledProduct();
+					if (debug) {
+						logger.log(Level.INFO, "Value of new A(" + columnNumber + ")(" + cell.getX() + ") = "
+								+ formulaLog.toString() + " = " + value);
+						formulaLog.setLength(0);
 					}
-					logger.log(Level.INFO, "Value of A(" + columnNumber + ")(" + cell.getX() + ") = " + value);
 					newA.setToValue(columnNumber, cell.getX(), value);
 				}
 				columnNumber++;
@@ -136,10 +182,10 @@ public class BaumWelch {
 				double muNumerator = 0.0;
 				double sigmaNumerator = 0.0;
 				for (int t = 0; t < sequence.size(); t++) {
-					muNumerator += Formula.gamma(currentModel, container, t, j, debug) // Mu re-estimation, formula
+					muNumerator += Formula.gamma(currentModel, container, t, j, false) // Mu re-estimation, formula
 																						// 53
 							* sequence.getObservation(t);
-					sigmaNumerator += Formula.gamma(currentModel, container, t, j, debug) // Sigma re-estimation,
+					sigmaNumerator += Formula.gamma(currentModel, container, t, j, false) // Sigma re-estimation,
 																							// formula 54
 							* ((sequence.getObservation(t) - b[j].getMu())
 									* (sequence.getObservation(t) - b[j].getMu()));
@@ -147,7 +193,7 @@ public class BaumWelch {
 				// common denominator
 				double denominator = 0.0;
 				for (int t = 0; t < sequence.size(); t++) {
-					denominator += Formula.gamma(currentModel, container, t, j, debug);
+					denominator += Formula.gamma(currentModel, container, t, j, false);
 				}
 				if (Double.compare(denominator, 0.0) == 0) {
 					throw new ArithmeticException("Can't divide by zero");
@@ -161,7 +207,10 @@ public class BaumWelch {
 			// END of B re-estimation
 		}
 		if (round > 0) { // likelihood of the test sequence must be evaluated with the previous one
-			System.out.println("New likelihood: " + newLikelihood + " ||| Current likelihood: " + currentLikelihood);
+			if (debug) {
+				logger.log(Level.INFO,
+						"New likelihood: " + newLikelihood + " | Current likelihood: " + currentLikelihood);
+			}
 			if (currentLikelihood > newLikelihood) {
 				convergent = true;
 			}

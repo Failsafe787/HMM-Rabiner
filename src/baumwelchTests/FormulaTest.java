@@ -1,7 +1,7 @@
 /*
  * Released under MIT License (Expat)
  * @author Luca Banzato
- * @version 0.1
+ * @version 0.1.8
  */
 
 package baumwelchTests;
@@ -47,7 +47,7 @@ class FormulaTest {
 		Formula.alpha(test, container, sequence, false, true);
 		SparseMatrix alphaMatrix = container.getAlphaMatrix();
 		assertTrue(Double.compare(container.getAlphaValue(), 1.334122388674474E-4) == 0);
-		//System.out.print(alphaMatrix.toStringMatrix());
+		// System.out.print(alphaMatrix.toStringMatrix());
 		assertTrue(Double.compare(alphaMatrix.getValue(0, 0), 0.18528647858278147) == 0);
 		assertTrue(Double.compare(alphaMatrix.getValue(0, 1), 0.026574007360815385) == 0);
 		assertTrue(Double.compare(alphaMatrix.getValue(1, 0), 1.0959873053370272E-4) == 0);
@@ -83,7 +83,7 @@ class FormulaTest {
 		Formula.alpha(test, container, sequence, false, true);
 		Formula.beta(test, container, sequence, false, true);
 		SparseMatrix betaMatrix = container.getBetaMatrix();
-		//System.out.print(betaMatrix.toStringMatrix());
+		// System.out.print(betaMatrix.toStringMatrix());
 		assertTrue(Double.compare(betaMatrix.getValue(3, 0), 1.0) == 0);
 		assertTrue(Double.compare(betaMatrix.getValue(3, 1), 1.0) == 0);
 		assertTrue(Double.compare(betaMatrix.getValue(2, 0), 0.08488957445448916) == 0);
@@ -119,7 +119,7 @@ class FormulaTest {
 		Formula.alpha(test, container, sequence, false, false);
 		Formula.beta(test, container, sequence, false, false);
 		double gammaValue = Formula.gamma(test, container, 3, 0, false);
-		double psiValue = Formula.psi(test, container, sequence, 0, 1, 2);
+		double psiValue = Formula.psi(test, container, sequence, 0, 1, 2, false);
 		assertTrue(Double.compare(container.getAlphaValue(), 1.334122388674474E-4) == 0);
 		assertTrue(Double.compare(gammaValue, 0.6353927781856177) == 0);
 		assertTrue(Double.compare(psiValue, 0.0903605851351128) == 0);
