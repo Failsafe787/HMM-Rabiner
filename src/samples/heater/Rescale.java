@@ -23,7 +23,6 @@ public class Rescale {
 		try {
 			br = new BufferedReader(new FileReader(inpath));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		String line;
@@ -32,34 +31,29 @@ public class Rescale {
 				buffer.add(new EngSlot(line));
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			try {
 				br.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		try {
 			bw = new BufferedWriter(new FileWriter(outpath));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		for (int i = 0; i < buffer.size(); i = i + n) {
 			try {
 				bw.write(accumulate(buffer, i, n).print() + "\n");
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		try {
 			bw.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return 0;

@@ -20,7 +20,6 @@ public class BWContainer {
 	// required for the Baum-Welch algorithm. Each container provides
 	// structures where it is possible to store all the alpha and beta computations,
 	// alongside all the partial models structures ( pi, a and b matrices).
-	// Everything is dependent from the observed sequence, which must be provided
 
 	private SparseMatrix alphaMatrix;
 	private SparseMatrix betaMatrix;

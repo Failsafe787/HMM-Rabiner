@@ -246,14 +246,8 @@ public class ContinuousModel {
 		}
 	}
 
-	private boolean readCurves(String path) throws IllegalBDefinitionException, IllegalStatesNamesSizeException { // Path
-																													// +
-																													// project
-																													// name
-																													// (e.g.
-		// /home/user/hmm/models/phone,
-		// without .pi, .trans
-		// or .curves)
+	private boolean readCurves(String path) throws IllegalBDefinitionException, IllegalStatesNamesSizeException { 
+		// Path + project name (e.g. /home/user/hmm/models/phone, without .pi, .trans or .curves extensions)
 		boolean valid = false;
 		try (BufferedReader br = new BufferedReader(new FileReader(path))) {
 			String line;

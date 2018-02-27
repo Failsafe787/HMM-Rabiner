@@ -287,7 +287,7 @@ public class BaumWelch {
 	}
 
 	public boolean isStopSuggested() { // Returns true if the model is convergent or more than a certain number of BW
-		// steps has been done (currently 30)
+		// steps has been done (currently set to 30)
 		return (convergent || round > 29);
 	}
 

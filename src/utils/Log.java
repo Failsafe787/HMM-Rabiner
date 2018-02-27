@@ -19,7 +19,7 @@ import java.util.logging.SimpleFormatter;
 public class Log {
 
 	private static Logger logger = null;
-	private final static String path = "C:\\Users\\Luca\\Desktop\\BW Logs\\";
+	private final static String path = "C:\\Users\\Luca Banzato\\Desktop\\BW Logs\\";
 
 	private static void initialize() { // Singleton class for logger
 		logger = Logger.getLogger("BaumWelch");
@@ -35,21 +35,17 @@ public class Log {
 				fh.setFormatter(formatter);
 			} catch (SecurityException e) {
 				error = true;
-				System.out
-						.println("WARNING: cannot save log file in the specified location due to permission problems: "
-								+ e.getMessage());
+				System.out.println("WARNING: cannot save log file in the specified location due to permission problems: " + e.getMessage());
 			} catch (NoSuchFileException e) {
 				try {
 					Files.createDirectories(Paths.get(path));
 				} catch (IOException e1) {
 					error = true;
-					System.out.println("WARNING: cannot save log file in the specified location due to IO problems: "
-							+ e1.getMessage());
+					System.out.println("WARNING: cannot save log file in the specified location due to IO problems: " + e1.getMessage());
 				}
 			} catch (IOException e) {
 				error = true;
-				System.out.println("WARNING: cannot save log file in the specified location due to IO problems: "
-						+ e.getMessage());
+				System.out.println("WARNING: cannot save log file in the specified location due to IO problems: " + e.getMessage());
 			}
 			nTries++;
 		}
