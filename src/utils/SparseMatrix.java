@@ -9,7 +9,7 @@ package utils;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class SparseMatrix implements Iterable<SparseArray>{
+public class SparseMatrix implements Iterable<SparseArray> {
 
 	private ArrayList<SparseArray> matrix;
 	private int x;
@@ -42,32 +42,32 @@ public class SparseMatrix implements Iterable<SparseArray>{
 
 	@Override
 	public String toString() { // Returns a printable representation of the matrix in a vectorial format
-		StringBuilder stringbuilded = new StringBuilder("");
-		stringbuilded.append("{");
+		StringBuilder finalString = new StringBuilder("");
+		finalString.append("{");
 		int i;
 		for (i = 0; i < matrix.size(); i++) {
-			stringbuilded.append(matrix.get(i).toString() + ",");
+			finalString.append(matrix.get(i).toString() + ",");
 		}
 		if (i > 0) {
-			stringbuilded.deleteCharAt(stringbuilded.length() - 1);
+			finalString.deleteCharAt(finalString.length() - 1);
 		}
-		stringbuilded.append("}");
-		return stringbuilded.toString();
+		finalString.append("}");
+		return finalString.toString();
 	}
 
 	public String toStringMatrix() { // Returns a printable, human-like representation of the matrix
-		StringBuilder stringbuilded = new StringBuilder("");
+		StringBuilder finalString = new StringBuilder("");
 		for (int i = 0; i < matrix.size(); i++) {
 			int j;
 			for (j = 0; j < matrix.get(i).size(); j++) {
-				stringbuilded.append(getValue(i, j) + "\t");
+				finalString.append(getValue(i, j) + "\t");
 			}
 			if (j > 0) {
-				stringbuilded.deleteCharAt(stringbuilded.length() - 1);
+				finalString.deleteCharAt(finalString.length() - 1);
 			}
-			stringbuilded.append("\n");
+			finalString.append("\n");
 		}
-		return stringbuilded.toString();
+		return finalString.toString();
 	}
 
 	public int getRowsNumber() { // number of rows getter
@@ -77,7 +77,7 @@ public class SparseMatrix implements Iterable<SparseArray>{
 	public int getColumnsNumber() { // number of columns getter
 		return y;
 	}
-	
+
 	@Override
 	public Iterator<SparseArray> iterator() { // Used to allow the for-each paradigm
 		return matrix.iterator();

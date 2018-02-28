@@ -61,7 +61,7 @@ public class BaumWelch {
 			IllegalPiDefinitionException {
 
 		if (debug) {
-			logger.log(Level.INFO, "===== Round " + round + " ===== ");
+			logger.log(Level.INFO, "\n\n===== Round " + round + " ===== ");
 		}
 
 		double newLikelihood = 1.0; // Used for model evalutation
@@ -81,7 +81,8 @@ public class BaumWelch {
 			}
 		}
 		for (int i = 0; i < sequences.size(); i++) {
-			BWContainer container = workingBench.get(i); // Keeps all the A/B/Pi values in an object
+			BWContainer container = workingBench.get(i); // Keeps all the A/B/Pi values in an object for each partial
+															// model
 			ObsSequence sequence = sequences.get(i);
 			if (round == 0) {
 				currentModel.randomizeB(sequence.getMean()); // Gaussians randomic values need to be polarized to
@@ -105,105 +106,15 @@ public class BaumWelch {
 			}
 
 			// BEGIN of Pi re-estimation
-			SparseArray pi = currentModel.getPi();
-			SparseArray newPi = container.getPi();
-			for (Couple cell : pi) {
-				newPi.setToValue(cell.getX(), Formula.gamma(currentModel, container, 0, cell.getX(), false));
-				if (debug) {
-					logger.log(Level.INFO, "Value of new Pi(" + cell.getX() + ") = "
-							+ Formula.gamma(currentModel, container, 0, cell.getX(), false) + "\n");
-				}
-			}
+			piReestimation(container, debug);
 			// END of Pi re-estimation
 
 			// BEGIN of A re-estimation
-			SparseMatrix a = currentModel.getA();
-			// System.out.println("A getted:" + a.toString());
-			SparseMatrix newA = container.getA();
-			int columnNumber = 0;
-			StringBuilder formulaLog = null;
-			if (debug) {
-				formulaLog = new StringBuilder();
-				formulaLog.append("(");
-			}
-			for (SparseArray column : a) {
-				for (Couple cell : column) {
-					double value = 0.0;
-					double numerator = 0.0;
-					for (int t = 0; t < sequence.size() - 2; t++) { // From 1 to T-1 (in Rabiner's formula, 40b)
-						numerator += Formula.psi(currentModel, container, sequence, columnNumber, cell.getX(), t,
-								false);
-						if (debug) {
-							formulaLog.append(
-									Formula.psi(currentModel, container, sequence, columnNumber, cell.getX(), t, false)
-											+ " + ");
-						}
-					}
-					double denominator = 0.0;
-					if (debug) {
-						formulaLog.deleteCharAt(formulaLog.length() - 1);
-						formulaLog.deleteCharAt(formulaLog.length() - 1);
-						formulaLog.deleteCharAt(formulaLog.length() - 1);
-						formulaLog.append(") / (");
-					}
-					for (int t = 0; t < sequence.size() - 2; t++) { // From 1 to T-1 (in Rabiner's formula, 40b)
-						denominator += Formula.gamma(currentModel, container, t, columnNumber, false);
-						if (debug) {
-							formulaLog.append(Formula.gamma(currentModel, container, t, columnNumber, false) + " + ");
-						}
-					}
-					if (debug) {
-						formulaLog.deleteCharAt(formulaLog.length() - 1);
-						formulaLog.deleteCharAt(formulaLog.length() - 1);
-						formulaLog.deleteCharAt(formulaLog.length() - 1);
-						formulaLog.append(")");
-					}
-					if (Double.compare(denominator, 0.0) == 0) {
-						throw new ArithmeticException("Can't divide by zero");
-					}
-					value = numerator / denominator;
-					if (debug) {
-						logger.log(Level.INFO, "Value of new A(" + columnNumber + ")(" + cell.getX() + ") = "
-								+ formulaLog.toString() + " = " + value);
-						formulaLog.setLength(0);
-					}
-					newA.setToValue(columnNumber, cell.getX(), value);
-				}
-				columnNumber++;
-			}
+			aReestimation(container, sequence, debug);
 			// END of A re-estimation
 
 			// BEGIN of B re-estimation
-			GaussianCurve[] b = currentModel.getB();
-			GaussianCurve[] newB = container.getB();
-			for (int j = 0; j < b.length; j++) {
-				double muValue = 0.0;
-				double sigmaValue = 0.0;
-				double muNumerator = 0.0;
-				double sigmaNumerator = 0.0;
-				for (int t = 0; t < sequence.size(); t++) {
-					muNumerator += Formula.gamma(currentModel, container, t, j, false) // Mu re-estimation, formula
-																						// 53
-							* sequence.getObservation(t);
-					sigmaNumerator += Formula.gamma(currentModel, container, t, j, false) // Sigma re-estimation,
-																							// formula 54
-							* ((sequence.getObservation(t) - b[j].getMu())
-									* (sequence.getObservation(t) - b[j].getMu()));
-				}
-				// common denominator
-				double denominator = 0.0;
-				for (int t = 0; t < sequence.size(); t++) {
-					denominator += Formula.gamma(currentModel, container, t, j, false);
-				}
-				if (Double.compare(denominator, 0.0) == 0) {
-					throw new ArithmeticException("Can't divide by zero");
-				}
-				muValue = muNumerator / denominator;
-				sigmaValue = sigmaNumerator / denominator;
-				newB[j].setMu(muValue);
-				newB[j].setSigma(sigmaValue);
-			}
-
+			bReestimation(container, sequence, debug);
 			// END of B re-estimation
 		}
 		if (round > 0) { // likelihood of the test sequence must be evaluated with the previous one
@@ -216,7 +127,7 @@ public class BaumWelch {
 			}
 		}
 		currentLikelihood = newLikelihood;
-		currentModel = mergeModels(workingBench, currentModel.getNumberOfStates(), scaled);
+		currentModel = mergeModels(workingBench, currentModel.getNumberOfStates(), scaled, debug);
 		round++;
 		currentModel.writeToFiles(outputPath + "." + round); // Save all the models in files which name is
 																// "example.round_number" (e.g.
@@ -225,7 +136,105 @@ public class BaumWelch {
 		return currentModel;
 	}
 
-	public ContinuousModel mergeModels(ArrayList<BWContainer> containers, int nStates, boolean scaled)
+	private void piReestimation(BWContainer container, boolean debug) {
+		SparseArray pi = currentModel.getPi();
+		SparseArray newPi = container.getPi();
+		for (Couple cell : pi) {
+			newPi.setToValue(cell.getX(), Formula.gamma(currentModel, container, 0, cell.getX(), false));
+			if (debug) {
+				logger.log(Level.INFO, "Value of new Pi(" + cell.getX() + ") = "
+						+ Formula.gamma(currentModel, container, 0, cell.getX(), false) + "\n");
+			}
+		}
+	}
+
+	private void aReestimation(BWContainer container, ObsSequence sequence, boolean debug) {
+		SparseMatrix a = currentModel.getA();
+		SparseMatrix newA = container.getA();
+		StringBuilder formulaLog = null;
+		if (debug) {
+			formulaLog = new StringBuilder();
+			formulaLog.append("(");
+		}
+		int columnNumber = 0;
+		for (SparseArray column : a) {
+			for (Couple cell : column) {
+				double value = 0.0;
+				double numerator = 0.0;
+				for (int t = 0; t < sequence.size() - 2; t++) { // From 1 to T-1 (in Rabiner's formula, 40b)
+					numerator += Formula.psi(currentModel, container, sequence, columnNumber, cell.getX(), t, false);
+					if (debug) {
+						formulaLog.append(
+								Formula.psi(currentModel, container, sequence, columnNumber, cell.getX(), t, false)
+										+ " + ");
+					}
+				}
+				double denominator = 0.0;
+				if (debug) {
+					formulaLog.deleteCharAt(formulaLog.length() - 1);
+					formulaLog.deleteCharAt(formulaLog.length() - 1);
+					formulaLog.deleteCharAt(formulaLog.length() - 1);
+					formulaLog.append(") / (");
+				}
+				for (int t = 0; t < sequence.size() - 2; t++) { // From 1 to T-1 (in Rabiner's formula, 40b)
+					denominator += Formula.gamma(currentModel, container, t, columnNumber, false);
+					if (debug) {
+						formulaLog.append(Formula.gamma(currentModel, container, t, columnNumber, false) + " + ");
+					}
+				}
+				if (debug) {
+					formulaLog.deleteCharAt(formulaLog.length() - 1);
+					formulaLog.deleteCharAt(formulaLog.length() - 1);
+					formulaLog.deleteCharAt(formulaLog.length() - 1);
+					formulaLog.append(")");
+				}
+				if (Double.compare(denominator, 0.0) == 0) {
+					throw new ArithmeticException("Can't divide by zero");
+				}
+				value = numerator / denominator;
+				if (debug) {
+					logger.log(Level.INFO, "Value of new A(" + columnNumber + ")(" + cell.getX() + ") = "
+							+ formulaLog.toString() + " = " + value);
+					formulaLog.setLength(0);
+				}
+				newA.setToValue(columnNumber, cell.getX(), value);
+			}
+			columnNumber++;
+		}
+	}
+
+	private void bReestimation(BWContainer container, ObsSequence sequence, boolean debug) {
+		GaussianCurve[] b = currentModel.getB();
+		GaussianCurve[] newB = container.getB();
+		for (int j = 0; j < b.length; j++) {
+			double muValue = 0.0;
+			double sigmaValue = 0.0;
+			double muNumerator = 0.0;
+			double sigmaNumerator = 0.0;
+			for (int t = 0; t < sequence.size(); t++) {
+				muNumerator += Formula.gamma(currentModel, container, t, j, false) // Mu re-estimation, formula
+																					// 53
+						* sequence.getObservation(t);
+				sigmaNumerator += Formula.gamma(currentModel, container, t, j, false) // Sigma re-estimation,
+																						// formula 54
+						* ((sequence.getObservation(t) - b[j].getMu()) * (sequence.getObservation(t) - b[j].getMu()));
+			}
+			// common denominator
+			double denominator = 0.0;
+			for (int t = 0; t < sequence.size(); t++) {
+				denominator += Formula.gamma(currentModel, container, t, j, false);
+			}
+			if (Double.compare(denominator, 0.0) == 0) {
+				throw new ArithmeticException("Can't divide by zero");
+			}
+			muValue = muNumerator / denominator;
+			sigmaValue = sigmaNumerator / denominator;
+			newB[j].setMu(muValue);
+			newB[j].setSigma(sigmaValue);
+		}
+	}
+
+	public ContinuousModel mergeModels(ArrayList<BWContainer> containers, int nStates, boolean scaled, boolean debug)
 			throws IllegalStatesNamesSizeException, IllegalADefinitionException, IllegalBDefinitionException,
 			IllegalPiDefinitionException {
 		if (containers.size() == 0) {
@@ -251,28 +260,11 @@ public class BaumWelch {
 			// END of PI merging
 
 			// BEGIN of A merging
-			int columnNumber = 0;
-			for (SparseArray column : a) {
-				for (Couple cell : column) {
-					int x = columnNumber;
-					int y = cell.getX();
-					logger.log(Level.INFO, cell.getValue() + " " + alpha);
-					newA.setToValue(x, y, newA.getValue(x, y) + a.getValue(x, y));
-				}
-				columnNumber++;
-			}
+			mergeA(a, newA, alpha, debug);
 			// END of A merging
 
 			// BEGIN of B merging
-			for (int i = 0; i < b.length; i++) {
-				if (first) {
-					newB[i].setMu(b[i].getMu());
-					newB[i].setSigma(b[i].getSigma());
-				} else {
-					newB[i].setMu(newB[i].getMu() + b[i].getMu());
-					newB[i].setSigma(newB[i].getSigma() + b[i].getSigma());
-				}
-			}
+			mergeB(b, newB, first, debug);
 			// END of B merging
 			if (first) {
 				first = false;
@@ -283,7 +275,31 @@ public class BaumWelch {
 			curve.setSigma(curve.getSigma() / nStates);
 		}
 		return new ContinuousModel(nStates, newA, newB, newPi, currentModel.getStatesNames());
+	}
 
+	private void mergeA(SparseMatrix a, SparseMatrix newA, double alpha, boolean debug) {
+		int columnNumber = 0;
+		for (SparseArray column : a) {
+			for (Couple cell : column) {
+				int x = columnNumber;
+				int y = cell.getX();
+				logger.log(Level.INFO, cell.getValue() + " " + alpha);
+				newA.setToValue(x, y, newA.getValue(x, y) + a.getValue(x, y));
+			}
+			columnNumber++;
+		}
+	}
+
+	private void mergeB(GaussianCurve[] b, GaussianCurve[] newB, boolean first, boolean debug) {
+		for (int i = 0; i < b.length; i++) {
+			if (first) {
+				newB[i].setMu(b[i].getMu());
+				newB[i].setSigma(b[i].getSigma());
+			} else {
+				newB[i].setMu(newB[i].getMu() + b[i].getMu());
+				newB[i].setSigma(newB[i].getSigma() + b[i].getSigma());
+			}
+		}
 	}
 
 	public boolean isStopSuggested() { // Returns true if the model is convergent or more than a certain number of BW
