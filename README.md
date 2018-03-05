@@ -7,7 +7,7 @@ This is a university project I'm developing for an exam. Many parts are or can b
 ## State
 
 ### Current version
-Version 0.1.10 - Wednesday, February 28, 2018
+Version 0.1.11 - Monday, March 5, 2018
 
 Made with Eclipse Oxygen.2 and Java 9
 
@@ -15,11 +15,11 @@ Made with Eclipse Oxygen.2 and Java 9
 - [x] Implementation of basic structures (Couple, SparseArray, ...) inside utils package
 - [x] Implementation of Alpha, Beta, Gamma and Psi formulas
 - [x] Logging options for Alpha, Beta, Gamma and Psi formulas
-- [ ] Implementation of Viterbi algorithm
+- [x] Implementation of Viterbi algorithm
 - [x] Implementation of Continuous data observations
 - [x] Implementation of scaled versions of Alpha and Beta
 - [x] Implementation of Baum-Welch algorithm
-- [ ] Logging options for Baum-Welch algorithm
+- [x] Logging options for Baum-Welch algorithm
 - [ ] FINAL STEP - Implementation of a classificator which uses models created with Baum-Welch
 
 ### Tests

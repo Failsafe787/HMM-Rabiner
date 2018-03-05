@@ -119,9 +119,9 @@ class FormulaTest {
 		Formula.alpha(test, container, sequence, false, false);
 		Formula.beta(test, container, sequence, false, false);
 		double gammaValue = Formula.gamma(test, container, 3, 0, false);
-		double psiValue = Formula.psi(test, container, sequence, 0, 1, 2, false);
+		double xiValue = Formula.xi(test, container, sequence, 0, 1, 2, false);
 		assertTrue(Double.compare(container.getAlphaValue(), 1.334122388674474E-4) == 0);
 		assertTrue(Double.compare(gammaValue, 0.6353927781856177) == 0);
-		assertTrue(Double.compare(psiValue, 0.0903605851351128) == 0);
+		assertTrue(Double.compare(xiValue, 0.0903605851351128) == 0);
 	}
 }

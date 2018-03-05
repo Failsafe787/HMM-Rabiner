@@ -48,7 +48,7 @@ public class Formula {
 		if (debug) {
 			statesNames = model.getStatesNames();
 		}
-		for (Couple cell : pi) { // Initialization
+		for (Couple cell : pi) { // Initialization - Implementation of formula 19
 			int state = cell.getX();
 			double pi1 = cell.getValue();
 			double bi1 = b[state].fi(sequence.getObservation(0));
@@ -92,7 +92,7 @@ public class Formula {
 		if (debug) {
 			statesNames = model.getStatesNames();
 		}
-		for (int t = 1; t < time; t++) { // Induction
+		for (int t = 1; t < time; t++) { // Induction - Implementation of formula 20
 			SparseArray previousColumn = alphaMatrix.getColumn(t - 1);
 			double alphaInduction = 0.0;
 			double factor = 0.0;
@@ -159,7 +159,7 @@ public class Formula {
 				operationLog.append("0.0");
 			}
 		}
-		double alpha = 0.0; // Termination
+		double alpha = 0.0; // Termination - Implementation of formula 21 (base formula) or 103 (scaled formula)
 		if (scaled) { // alpha scaled is 1/(product of all the scaling factors), as stated on formula
 						// 102 in Rabiner's paper, but due to the limited dynamic range of the machine
 						// formula 103 is used instead of the first one
@@ -213,7 +213,7 @@ public class Formula {
 		if (debug) {
 			statesNames = model.getStatesNames();
 		}
-		for (int state = 0; state < numberOfStates; state++) { // Initialization
+		for (int state = 0; state < numberOfStates; state++) { // Initialization - Implementation of formula 24
 			betaMatrix.setToValue(time - 1, state, 1.0);
 			if (debug) {
 				logger.log(Level.INFO, "beta(" + (time - 1) + ")(" + statesNames.get(state) + ") = 1.0");
@@ -248,7 +248,7 @@ public class Formula {
 			betaLog = new StringBuilder();
 		}
 		double betaInduction;
-		for (int t = time - 2; t >= 0; t--) { // Induction
+		for (int t = time - 2; t >= 0; t--) { // Induction - Implementation of formula 25
 			SparseArray previousColumn = betaMatrix.getColumn(t + 1);
 			for (int i = 0; i < numberOfStates; i++) {
 				betaInduction = 0.0;
@@ -332,23 +332,23 @@ public class Formula {
 		return numerator / denominator;
 	}
 
-	public static double psi(ContinuousModel model, BWContainer container, ObsSequence sequence, int statei, int statej,
+	public static double xi(ContinuousModel model, BWContainer container, ObsSequence sequence, int statei, int statej,
 			int time, boolean debug) {
 		SparseMatrix alphaMatrix = container.getAlphaMatrix();
 		SparseMatrix betaMatrix = container.getBetaMatrix();
 		if (time >= sequence.size() - 1) {
-			logger.log(Level.WARNING, "Psi formula used with an inexistent state j, 0.0 returned!");
+			logger.log(Level.WARNING, "Xi formula used with an inexistent state j, 0.0 returned!");
 			return 0.0;
 		}
 		int numberOfStates = model.getNumberOfStates();
 		SparseMatrix a = model.getA();
 		GaussianCurve[] b = model.getB();
-		StringBuilder psiLog = null;
+		StringBuilder xiLog = null;
 		if (debug) {
-			psiLog = new StringBuilder();
-			psiLog.append(
-					"Psi(" + model.getStatesNames().get(statei) + ")(" + model.getStatesNames().get(statej) + ") = ");
-			psiLog.append("alpha(" + time + ")(" + model.getStatesNames().get(statei) + ") ["
+			xiLog = new StringBuilder();
+			xiLog.append(
+					"Xi(" + model.getStatesNames().get(statei) + ")(" + model.getStatesNames().get(statej) + ") = ");
+			xiLog.append("alpha(" + time + ")(" + model.getStatesNames().get(statei) + ") ["
 					+ alphaMatrix.getValue(time, statei) + "] * " + "A (" + model.getStatesNames().get(statei) + ")("
 					+ model.getStatesNames().get(statej) + ") [" + a.getValue(statei, statej) + "] *"
 					+ b[statej].fi(sequence.getObservation(time + 1)) + " *" + "beta(" + (time + 1) + ")("
@@ -357,7 +357,7 @@ public class Formula {
 		double numerator = alphaMatrix.getValue(time, statei) * a.getValue(statei, statej)
 				* b[statej].fi(sequence.getObservation(time + 1)) * betaMatrix.getValue(time + 1, statej);
 		if (debug) {
-			psiLog.append(" / ");
+			xiLog.append(" / ");
 		}
 		double denominator = 0.0;
 		for (int i = 0; i < numberOfStates; i++) {
@@ -365,7 +365,7 @@ public class Formula {
 				denominator += alphaMatrix.getValue(time, i) * a.getValue(i, j)
 						* b[j].fi(sequence.getObservation(time + 1)) * betaMatrix.getValue(time + 1, j);
 				if (debug) {
-					psiLog.append("alpha(" + time + ")(" + model.getStatesNames().get(i) + ") ["
+					xiLog.append("alpha(" + time + ")(" + model.getStatesNames().get(i) + ") ["
 							+ alphaMatrix.getValue(time, i) + "] * " + "A (" + model.getStatesNames().get(i) + ")("
 							+ model.getStatesNames().get(j) + ") [" + a.getValue(i, j) + "] *"
 							+ b[statej].fi(sequence.getObservation(time + 1)) + " *" + "beta(" + (time + 1) + ")("
@@ -377,13 +377,40 @@ public class Formula {
 			throw new ArithmeticException("Can't divide by zero");
 		}
 		if (debug) {
-			psiLog.deleteCharAt(psiLog.length() - 1);
-			psiLog.deleteCharAt(psiLog.length() - 1);
-			psiLog.deleteCharAt(psiLog.length() - 1);
-			psiLog.append(" = " + (numerator / denominator));
-			logger.log(Level.INFO, psiLog.toString());
+			xiLog.deleteCharAt(xiLog.length() - 1);
+			xiLog.deleteCharAt(xiLog.length() - 1);
+			xiLog.deleteCharAt(xiLog.length() - 1);
+			xiLog.append(" = " + (numerator / denominator));
+			logger.log(Level.INFO, xiLog.toString());
 		}
 		return numerator / denominator;
+	}
+	
+	public static double psi(BWContainer container) { // Viterbi Algorithm, alpha method must be executed before than this
+		SparseMatrix alphaMatrix = container.getAlphaMatrix();
+		Couple[] psiStates = container.getPsiArray();
+		int columnNumber = 0; // Keep track of the column number while using "for-each"
+		for(SparseArray column : alphaMatrix) {
+			if(column.effectiveLength()==0) { // All the values in the column are 0
+				psiStates[columnNumber] = new Couple(0,0.0); // A placeholder cell C(x=column,y=0,value=0.0) is added to the sequence
+			}
+			else {
+				Couple best = null;
+				for(Couple cell : column) {
+					if(best==null) { // First cell visited
+						best = cell; // and it's considered the best at the moment
+					}
+					else { // It is possible to compare cells
+						if(Double.compare(best.getValue(),cell.getValue())<0) { // If best.value < current.value
+							best = cell; // Replace best with current visited cell
+						}
+					}
+				}
+				psiStates[columnNumber] = best; // Assign the best cell to the sequence
+			}
+			columnNumber++;
+		}
+		return psiStates[(columnNumber -1)].getValue(); // Returns the value of the best cell at time T
 	}
 
 }

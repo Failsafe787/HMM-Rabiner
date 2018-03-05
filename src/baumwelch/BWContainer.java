@@ -9,6 +9,7 @@ package baumwelch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import utils.Couple;
 import utils.GaussianCurve;
 import utils.Log;
 import utils.SparseArray;
@@ -27,6 +28,7 @@ public class BWContainer {
 	private SparseMatrix a;
 	private GaussianCurve[] b;
 	private double[] factors;
+	private Couple[] psiStates;
 	private double alphaValue = 0.0;
 	private boolean isAlphaProcessed = false;
 	private Logger logger = Log.getLogger();
@@ -44,6 +46,7 @@ public class BWContainer {
 		for (int i = 0; i < factors.length; i++) {
 			factors[i] = 0.0;
 		}
+		psiStates = new Couple[sequenceSize];
 	}
 
 	public SparseMatrix getAlphaMatrix() {
@@ -89,6 +92,10 @@ public class BWContainer {
 			return -1.0;
 		}
 		return alphaValue;
+	}
+	
+	public Couple[] getPsiArray() {
+		return psiStates;
 	}
 
 }

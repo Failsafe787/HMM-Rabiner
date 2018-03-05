@@ -162,10 +162,10 @@ public class BaumWelch {
 				double value = 0.0;
 				double numerator = 0.0;
 				for (int t = 0; t < sequence.size() - 2; t++) { // From 1 to T-1 (in Rabiner's formula, 40b)
-					numerator += Formula.psi(currentModel, container, sequence, columnNumber, cell.getX(), t, false);
+					numerator += Formula.xi(currentModel, container, sequence, columnNumber, cell.getX(), t, false);
 					if (debug) {
 						formulaLog.append(
-								Formula.psi(currentModel, container, sequence, columnNumber, cell.getX(), t, false)
+								Formula.xi(currentModel, container, sequence, columnNumber, cell.getX(), t, false)
 										+ " + ");
 					}
 				}
