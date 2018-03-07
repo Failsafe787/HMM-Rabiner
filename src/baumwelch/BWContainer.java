@@ -49,31 +49,31 @@ public class BWContainer {
 		psiStates = new Couple[sequenceSize];
 	}
 
-	public SparseMatrix getAlphaMatrix() {
+	public SparseMatrix getAlphaMatrix() { // Returns the alpha matrix
 		return alphaMatrix;
 	}
 
-	public SparseMatrix getBetaMatrix() {
+	public SparseMatrix getBetaMatrix() { // Returns the beta matrix
 		return betaMatrix;
 	}
 
-	public SparseArray getPi() {
+	public SparseArray getPi() { // Returns the pi vector
 		return pi;
 	}
 
-	public SparseMatrix getA() {
+	public SparseMatrix getA() { // Returns the A matrix
 		return a;
 	}
 
-	public GaussianCurve[] getB() {
+	public GaussianCurve[] getB() { // Returns the B vector
 		return b;
 	}
 
-	public double[] getScalingFactors() {
+	public double[] getScalingFactors() { // Returns the scaling factors in an array
 		return factors;
 	}
 
-	public double getScaledProduct() {
+	public double getScaledProduct() { // Returns the product of all the scaling factors
 		double product = 1.0;
 		for (double factor : factors) {
 			product *= factor;
@@ -81,20 +81,20 @@ public class BWContainer {
 		return product;
 	}
 
-	public void setAlphaValue(double value) {
+	public void setAlphaValue(double value) { // Set the alpha value with the one provided, used in Formula.alpha()
 		alphaValue = value;
 		isAlphaProcessed = true;
 	}
 
-	public double getAlphaValue() {
+	public double getAlphaValue() { // Returns the probability of the model to be the generator of a sequence
 		if (!isAlphaProcessed) {
 			logger.log(Level.WARNING, "Alpha matrix hasn't been computed, -1 is returned!");
-			return -1.0;
+			return -1.0; // -1 is returned and a warning issued if alpha hasn't been calculated previously
 		}
 		return alphaValue;
 	}
 	
-	public Couple[] getPsiArray() {
+	public Couple[] getPsiArray() { // Returns the most likely states sequence the model has done to produce a sequence (Viterbi)
 		return psiStates;
 	}
 

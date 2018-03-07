@@ -25,13 +25,13 @@ public class BaumWelch {
 
 	// This class implements
 
-	private ContinuousModel currentModel;
-	private ArrayList<ObsSequence> sequences;
-	private ArrayList<BWContainer> workingBench;
-	private double currentLikelihood;
+	private ContinuousModel currentModel; // The current model produced by BaumWelch
+	private ArrayList<ObsSequence> sequences; // All the observation sequences
+	private ArrayList<BWContainer> workingBench; // BWContainers that keep all the temporary models
+	private double currentLikelihood; // The probability the model has to generate the sequences provided above
 	private Logger logger = Log.getLogger();
-	private int round = 0;
-	private boolean convergent = false;
+	private int round = 0; // Denotes the round number of BW
+	private boolean convergent = false; // Denotes if a worse model has been produced after a BW iteration 
 
 	// Constructor without a model already prepared
 	public BaumWelch(int nStates, String path, ArrayList<ObsSequence> sequences, boolean debug)
@@ -64,12 +64,12 @@ public class BaumWelch {
 			logger.log(Level.INFO, "\n\n===== Round " + round + " ===== ");
 		}
 
-		double newLikelihood = 1.0; // Used for model evalutation
+		double newLikelihood = 1.0; // Used for model evaluation
 
 		if (round == 0) {
-			currentModel.randomizePi();
+			currentModel.randomizePi(); // Randomize Pi and A (only at the beginning), read below for B
 			currentModel.randomizeA();
-			workingBench = new ArrayList<BWContainer>(); // Initialize a new "Working Bench" (ArrayList of BWContainers)
+			workingBench = new ArrayList<BWContainer>(); // Initializes a new "Working Bench" (ArrayList of BWContainers)
 			for (ObsSequence sequence : sequences) {
 				workingBench.add(new BWContainer(currentModel.getNumberOfStates(), sequence.size()));
 			}
@@ -85,16 +85,16 @@ public class BaumWelch {
 															// model
 			ObsSequence sequence = sequences.get(i);
 			if (round == 0) {
-				currentModel.randomizeB(sequence.getMean()); // Gaussians randomic values need to be polarized to
+				currentModel.randomizeB(sequence.getMean()); // Randomize Pi: Gaussians randomic values need to be polarized to
 																// the set (otherwise many 0 values are calculated by
 																// the probability density function due to sigma and mu)
 				if (debug) {
 					logger.log(Level.INFO, "B: " + Arrays.toString(currentModel.getB()));
 				}
 			}
-			Formula.alpha(currentModel, container, sequence, scaled, true);
+			Formula.alpha(currentModel, container, sequence, scaled, true); // Alpha
 			newLikelihood *= container.getAlphaValue(); // Updates the likelihood of the sequences created by this model
-			Formula.beta(currentModel, container, sequence, scaled, true);
+			Formula.beta(currentModel, container, sequence, scaled, true); // Beta
 			if (debug) {
 				logger.log(Level.INFO,
 						"\nAlpha Matrix obtained (from t=0 to T):\n" + container.getAlphaMatrix().toStringMatrix());
@@ -123,12 +123,12 @@ public class BaumWelch {
 						"New likelihood: " + newLikelihood + " | Current likelihood: " + currentLikelihood);
 			}
 			if (currentLikelihood > newLikelihood) {
-				convergent = true;
+				convergent = true; // A worse model has been produced. NOTE: you can however continue doing BW iterations
 			}
 		}
-		currentLikelihood = newLikelihood;
-		currentModel = mergeModels(workingBench, currentModel.getNumberOfStates(), scaled, debug);
-		round++;
+		currentLikelihood = newLikelihood; // Likelihood replaced
+		currentModel = mergeModels(workingBench, currentModel.getNumberOfStates(), scaled, debug); // Model merging
+		round++; // Round completed
 		currentModel.writeToFiles(outputPath + "." + round); // Save all the models in files which name is
 																// "example.round_number" (e.g.
 																// test.26.trans/curves/start)
@@ -139,6 +139,7 @@ public class BaumWelch {
 	private void piReestimation(BWContainer container, boolean debug) {
 		SparseArray pi = currentModel.getPi();
 		SparseArray newPi = container.getPi();
+		// Implementation of formula 40a (Pi(i) = gamma(1)(i))
 		for (Couple cell : pi) {
 			newPi.setToValue(cell.getX(), Formula.gamma(currentModel, container, 0, cell.getX(), false));
 			if (debug) {
@@ -157,11 +158,12 @@ public class BaumWelch {
 			formulaLog.append("(");
 		}
 		int columnNumber = 0;
+		// Implementation of formula 109, simplified as described on the errata (formula 13)
 		for (SparseArray column : a) {
 			for (Couple cell : column) {
 				double value = 0.0;
 				double numerator = 0.0;
-				for (int t = 0; t < sequence.size() - 2; t++) { // From 1 to T-1 (in Rabiner's formula, 40b)
+				for (int t = 0; t < sequence.size() - 2; t++) { // From 1 to T-1
 					numerator += Formula.xi(currentModel, container, sequence, columnNumber, cell.getX(), t, false);
 					if (debug) {
 						formulaLog.append(
@@ -176,7 +178,7 @@ public class BaumWelch {
 					formulaLog.deleteCharAt(formulaLog.length() - 1);
 					formulaLog.append(") / (");
 				}
-				for (int t = 0; t < sequence.size() - 2; t++) { // From 1 to T-1 (in Rabiner's formula, 40b)
+				for (int t = 0; t < sequence.size() - 2; t++) { // From 1 to T-1
 					denominator += Formula.gamma(currentModel, container, t, columnNumber, false);
 					if (debug) {
 						formulaLog.append(Formula.gamma(currentModel, container, t, columnNumber, false) + " + ");
@@ -206,6 +208,7 @@ public class BaumWelch {
 	private void bReestimation(BWContainer container, ObsSequence sequence, boolean debug) {
 		GaussianCurve[] b = currentModel.getB();
 		GaussianCurve[] newB = container.getB();
+		// Implementations of formula 53 and 54
 		for (int j = 0; j < b.length; j++) {
 			double muValue = 0.0;
 			double sigmaValue = 0.0;
@@ -251,11 +254,10 @@ public class BaumWelch {
 			SparseMatrix a = container.getA();
 			GaussianCurve[] b = container.getB();
 			double alpha = container.getAlphaValue();
-			// System.out.println("!" + containers.size() + " " + weightedSum);
 
 			// BEGIN of PI merging
 			if (first) {
-				newPi = container.getPi(); // Pi isn't re-estimated, as stated on page 273 of Rabiner's paper
+				newPi = container.getPi(); // Pi isn't merged, as stated on page 273 of Rabiner's paper
 			}
 			// END of PI merging
 
@@ -271,7 +273,7 @@ public class BaumWelch {
 			}
 		}
 		for (GaussianCurve curve : newB) {
-			curve.setMu(curve.getMu() / nStates);
+			curve.setMu(curve.getMu() / nStates); // Arithmetic mean of the Gaussians parameters has to be done after B merging
 			curve.setSigma(curve.getSigma() / nStates);
 		}
 		return new ContinuousModel(nStates, newA, newB, newPi, currentModel.getStatesNames());
@@ -279,6 +281,7 @@ public class BaumWelch {
 
 	private void mergeA(SparseMatrix a, SparseMatrix newA, double alpha, boolean debug) {
 		int columnNumber = 0;
+		// Matrix addition (iterative, each time sums the values of newA and an A inside a container
 		for (SparseArray column : a) {
 			for (Couple cell : column) {
 				int x = columnNumber;
@@ -291,6 +294,8 @@ public class BaumWelch {
 	}
 
 	private void mergeB(GaussianCurve[] b, GaussianCurve[] newB, boolean first, boolean debug) {
+		// Parameters addition (iterative, each time sums the values of Mu and Sigma
+		// of a container to the ones saved in newB
 		for (int i = 0; i < b.length; i++) {
 			if (first) {
 				newB[i].setMu(b[i].getMu());
@@ -300,6 +305,8 @@ public class BaumWelch {
 				newB[i].setSigma(newB[i].getSigma() + b[i].getSigma());
 			}
 		}
+		// NOTE: this is a partial formula, a division by the number of gaussians (= mean) must be done
+		// after the addition of all the gaussians paramteters
 	}
 
 	public boolean isStopSuggested() { // Returns true if the model is convergent or more than a certain number of BW
@@ -311,11 +318,11 @@ public class BaumWelch {
 		return round;
 	}
 
-	public double getCurrentLikelihood() {
+	public double getCurrentLikelihood() { // Returns the likelihood calculated after the latest BW step
 		return currentLikelihood;
 	}
 
-	public ContinuousModel getCurrentModel() {
+	public ContinuousModel getCurrentModel() { // Returns the model calculated after the latest BW step
 		return currentModel;
 	}
 }

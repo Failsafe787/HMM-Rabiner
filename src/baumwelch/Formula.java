@@ -39,6 +39,7 @@ public class Formula {
 
 	private static void alphaInitialization(ContinuousModel model, BWContainer container, ObsSequence sequence,
 			boolean scaled, boolean debug) {
+		// Gets all the required structures from model and container
 		SparseArray pi = model.getPi();
 		GaussianCurve[] b = model.getB();
 		SparseMatrix alphaMatrix = container.getAlphaMatrix();
@@ -48,12 +49,13 @@ public class Formula {
 		if (debug) {
 			statesNames = model.getStatesNames();
 		}
-		for (Couple cell : pi) { // Initialization - Implementation of formula 19
+		// Initialization of alpha - Implementation of formula 19
+		for (Couple cell : pi) {
 			int state = cell.getX();
 			double pi1 = cell.getValue();
 			double bi1 = b[state].fi(sequence.getObservation(0));
 			alphaMatrix.setToValue(0, state, pi1 * bi1);
-			if (scaled) {
+			if (scaled) { // Scaling factor summatory, implementation of formula 91
 				factor += pi1 * bi1;
 			}
 			if (debug) {
@@ -64,9 +66,9 @@ public class Formula {
 
 		if (scaled) { // Scale all the values inside the 1st column of the alpha matrix
 			factors = container.getScalingFactors();
-			factors[0] = 1 / factor;
+			factors[0] = 1 / factor; // Add the scaling factor to the factors arrays inside the container
 			SparseArray currentColumn = alphaMatrix.getColumn(0);
-			for (Couple cell : currentColumn) { // Initialization
+			for (Couple cell : currentColumn) { // Multiplies all the values with the scaling factor
 				int state = cell.getX();
 				cell.setValue(cell.getValue() * factors[0]);
 				if (debug) {
@@ -79,6 +81,7 @@ public class Formula {
 
 	private static void alphaInduction(ContinuousModel model, BWContainer container, ObsSequence sequence, boolean scaled,
 			boolean debug) {
+		// Gets all the required structures from model and container
 		SparseMatrix a = model.getA();
 		GaussianCurve[] b = model.getB();
 		SparseMatrix alphaMatrix = container.getAlphaMatrix();
@@ -92,7 +95,8 @@ public class Formula {
 		if (debug) {
 			statesNames = model.getStatesNames();
 		}
-		for (int t = 1; t < time; t++) { // Induction - Implementation of formula 20
+		// Induction - Implementation of formula 20
+		for (int t = 1; t < time; t++) {
 			SparseArray previousColumn = alphaMatrix.getColumn(t - 1);
 			double alphaInduction = 0.0;
 			double factor = 0.0;
@@ -112,9 +116,10 @@ public class Formula {
 				}
 				if (debug) {
 					if (previousColumn.effectiveLength() == 0) {
-						summatory.append("0.0");
+						summatory.append("0.0"); // If the alpha of all the states at t-1 is 0, just print 0.0 
+												 // (since nothing has been printed before)
 					}
-					if (summatory.charAt(summatory.length() - 2) == '+') {
+					if (summatory.charAt(summatory.length() - 2) == '+') { // Text formatting (remove an unused '+')
 						summatory.deleteCharAt(summatory.length() - 1);
 						summatory.deleteCharAt(summatory.length() - 1);
 						summatory.deleteCharAt(summatory.length() - 1);
@@ -124,7 +129,7 @@ public class Formula {
 				double bj = b[j].fi(sequence.getObservation(t));
 				alphaMatrix.setToValue(t, j, alphaInduction * bj);
 				if (scaled) {
-					factor += alphaInduction * bj;
+					factor += alphaInduction * bj; // Summatory of the scaling factor
 				}
 				if (debug) {
 					summatory.append(" x " + bj + " = " + alphaInduction * bj);
@@ -148,6 +153,7 @@ public class Formula {
 	}
 	
 	private static void alphaTermination(BWContainer container, int time, boolean scaled, boolean debug) {
+		// Gets all the required structures from model and container
 		SparseMatrix alphaMatrix = container.getAlphaMatrix();
 		SparseArray currentColumn = alphaMatrix.getColumn(time - 1);
 		double[] factors = null;
@@ -170,7 +176,7 @@ public class Formula {
 					operationLog.append("log(" + factor + ") [ " + Math.log(factor) + "] + ");
 				}
 			}
-			alpha *= -1.0;
+			alpha *= -1.0; // (-log(ct)), a - is required
 		} else {
 			if (debug) {
 				operationLog.append("(");
@@ -205,6 +211,7 @@ public class Formula {
 	}
 	
 	private static void betaInitialization(ContinuousModel model, BWContainer container, int sequenceSize, boolean scaled, boolean debug) {
+		// Gets all the required structures from model and container
 		int numberOfStates = model.getNumberOfStates();
 		SparseMatrix betaMatrix = container.getBetaMatrix();
 		double[] factors = container.getScalingFactors(); // Alpha method must be executed before this!
@@ -232,11 +239,12 @@ public class Formula {
 	}
 	
 	private static void betaInduction(ContinuousModel model, BWContainer container, ObsSequence sequence, boolean scaled, boolean debug) {
+		// Gets all the required structures from model and container
 		SparseMatrix a = model.getA();
 		GaussianCurve[] b = model.getB();
 		int numberOfStates = model.getNumberOfStates();
 		SparseMatrix betaMatrix = container.getBetaMatrix();
-		double[] factors = null; // Alpha method must be executed before this!
+		double[] factors = null; // NOTE: Alpha method must be executed before this!
 		if(scaled) {
 			factors = container.getScalingFactors();
 		}
@@ -269,7 +277,7 @@ public class Formula {
 				}
 				if (debug) {
 					if (previousColumn.effectiveLength() == 0) {
-						betaLog.append("0.0");
+						betaLog.append("0.0"); // Beta of all the states at time t+1 is 0, just print 0.0
 					} else {
 						betaLog.deleteCharAt(betaLog.length() - 1);
 						betaLog.deleteCharAt(betaLog.length() - 1);
@@ -280,7 +288,8 @@ public class Formula {
 				}
 				betaMatrix.setToValue(t, i, betaInduction);
 			}
-			if (scaled) {
+			if (scaled) { // Uses all the scaling factors calculated with alpha
+						  // as stated by Rabiner at page 272 below formula 94
 				SparseArray currentColumn = betaMatrix.getColumn(t);
 				for (Couple cell : currentColumn) {
 					cell.setValue(cell.getValue() * factors[t]);
@@ -294,18 +303,20 @@ public class Formula {
 	}
 
 	public static double gamma(ContinuousModel model, BWContainer container, int time, int state, boolean debug) {
+		// Gets all the required structures from model and container
 		StringBuilder gammaLog = null;
 		;
 		int numberOfStates = model.getNumberOfStates();
 		SparseMatrix alphaMatrix = container.getAlphaMatrix();
 		SparseMatrix betaMatrix = container.getBetaMatrix();
-		double numerator = alphaMatrix.getValue(time, state) * betaMatrix.getValue(time, state);
+		// Implementation of formula 27
+		double numerator = alphaMatrix.getValue(time, state) * betaMatrix.getValue(time, state); // Numerator
 		if (debug) {
 			gammaLog = new StringBuilder();
 			gammaLog.append("gamma(" + time + ")(" + model.getStatesNames().get(state) + ") = "
 					+ alphaMatrix.getValue(time, state) + " * " + betaMatrix.getValue(time, state));
 		}
-		double denominator = 0.0;
+		double denominator = 0.0; // Denominator (summatory)
 		if (debug) {
 			gammaLog.append(" / (");
 		}
@@ -334,9 +345,11 @@ public class Formula {
 
 	public static double xi(ContinuousModel model, BWContainer container, ObsSequence sequence, int statei, int statej,
 			int time, boolean debug) {
+		// Gets all the required structures from model and container
 		SparseMatrix alphaMatrix = container.getAlphaMatrix();
 		SparseMatrix betaMatrix = container.getBetaMatrix();
-		if (time >= sequence.size() - 1) {
+		if (time >= sequence.size() - 1) { // Xi cannot be used if there's a transition from statei 
+			// at time T to statej at time T+1 (observation at time T+1 doesn't exist)
 			logger.log(Level.WARNING, "Xi formula used with an inexistent state j, 0.0 returned!");
 			return 0.0;
 		}
@@ -344,6 +357,9 @@ public class Formula {
 		SparseMatrix a = model.getA();
 		GaussianCurve[] b = model.getB();
 		StringBuilder xiLog = null;
+		// Implementation of formula 37
+		double numerator = alphaMatrix.getValue(time, statei) * a.getValue(statei, statej) // Numerator
+				* b[statej].fi(sequence.getObservation(time + 1)) * betaMatrix.getValue(time + 1, statej);
 		if (debug) {
 			xiLog = new StringBuilder();
 			xiLog.append(
@@ -354,12 +370,10 @@ public class Formula {
 					+ b[statej].fi(sequence.getObservation(time + 1)) + " *" + "beta(" + (time + 1) + ")("
 					+ model.getStatesNames().get(statej) + ") [" + betaMatrix.getValue(time + 1, statej) + "]");
 		}
-		double numerator = alphaMatrix.getValue(time, statei) * a.getValue(statei, statej)
-				* b[statej].fi(sequence.getObservation(time + 1)) * betaMatrix.getValue(time + 1, statej);
 		if (debug) {
 			xiLog.append(" / ");
 		}
-		double denominator = 0.0;
+		double denominator = 0.0; // Denominator (Summatory)
 		for (int i = 0; i < numberOfStates; i++) {
 			for (int j = 0; j < numberOfStates; j++) {
 				denominator += alphaMatrix.getValue(time, i) * a.getValue(i, j)

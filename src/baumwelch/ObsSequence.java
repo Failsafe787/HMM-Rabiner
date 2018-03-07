@@ -130,7 +130,7 @@ public class ObsSequence {
 		return true;
 	}
 
-	public double getMean() {
+	public double getMean() { // Returns the arithmetic mean of all the values inside this sequence
 		if (sequence.size() == 0) {
 			return 0.0;
 		} else {
@@ -142,7 +142,7 @@ public class ObsSequence {
 		}
 	}
 
-	public int size() {
+	public int size() { // Returns the size of this sequence
 		return sequence.size();
 	}
 }

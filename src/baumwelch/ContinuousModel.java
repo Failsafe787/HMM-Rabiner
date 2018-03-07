@@ -29,16 +29,18 @@ import utils.SparseArray;
 
 public class ContinuousModel {
 
-	private SparseMatrix a;
-	private GaussianCurve[] b;
-	private SparseArray pi;
-	private ArrayList<String> statesName;
-	private int nStates;
+	private SparseMatrix a; // A
+	private GaussianCurve[] b; // B, or better, the gaussians that generate B
+	private SparseArray pi; // Pi
+	private ArrayList<String> statesName; // States Names (used for logging and save-to-file purposes)
+	private int nStates; // Number of states the model has
 	private Logger logger = Log.getLogger();
 
+	// Constructor used if A, B, Pi, number of states and names of the states are already available
 	public ContinuousModel(int nStates, SparseMatrix a, GaussianCurve[] b, SparseArray pi,
 			ArrayList<String> statesNames) throws IllegalStatesNamesSizeException, IllegalADefinitionException,
 			IllegalBDefinitionException, IllegalPiDefinitionException {
+		// Consistency checks between the number of the states and the structures provided
 		if (a.getRowsNumber() != nStates && a.getColumnsNumber() != nStates) {
 			throw new IllegalADefinitionException();
 		}
@@ -59,66 +61,70 @@ public class ContinuousModel {
 
 	}
 
+	// Constructor used if the model has to be read from a file
 	public ContinuousModel(int nStates, String pathName) throws IllegalPiDefinitionException,
 			IllegalADefinitionException, IllegalBDefinitionException, IllegalStatesNamesSizeException {
+		// Prepare all the structures in order to store the values
 		this.nStates = nStates;
 		a = new SparseMatrix(nStates, nStates);
 		b = new GaussianCurve[nStates];
 		pi = new SparseArray(nStates);
 		statesName = new ArrayList<String>();
+		// Read from file
 		readFromFile(pathName);
 	}
 
-	public SparseMatrix getA() {
+	public SparseMatrix getA() { // Returns A matrix
 		return a;
 	}
 
-	public GaussianCurve[] getB() {
+	public GaussianCurve[] getB() { // Returns B vector
 		return b;
 	}
 
-	public SparseArray getPi() {
+	public SparseArray getPi() { // Returns Pi vector
 		return pi;
 	}
 
-	public ArrayList<String> getStatesNames() {
+	public ArrayList<String> getStatesNames() { //  Returns all the states names stored in an array
 		return statesName;
 	}
 
-	public void setA(SparseMatrix a) throws IllegalADefinitionException {
+	public void setA(SparseMatrix a) throws IllegalADefinitionException { // Sets A
 		if (this.a.getRowsNumber() >= a.getRowsNumber() || this.a.getColumnsNumber() >= a.getColumnsNumber()) {
-			throw new IllegalADefinitionException();
+			throw new IllegalADefinitionException(); // Consistency check
 		}
 		this.a = a;
 	}
+	
+	public void setPi(SparseArray pi) { // Sets Pi
+		this.pi = pi;
+	}
 
-	public void setB(GaussianCurve[] b) throws IllegalBDefinitionException {
+	public void setB(GaussianCurve[] b) throws IllegalBDefinitionException { // Sets B
 		if (b.length != nStates) {
-			throw new IllegalBDefinitionException();
+			throw new IllegalBDefinitionException(); // Consistency check
 		}
 		this.b = b;
 	}
 
-	public int getNumberOfStates() {
+	public int getNumberOfStates() { // Returns the number of states of the model
 		return nStates;
 	}
 
-	public void setPi(SparseArray pi) {
-		this.pi = pi;
+	public void randomizePi() { // Randomize Pi vector (used in randomize())
+		probabilityFiller(pi);
 	}
 
-	public void randomizePi() { // Takes a polarizedValue for Mu and Sigma values generator (this value is used
-								// as base for Mu and Sigma)
-		probabilityFiller(pi, "pi");
-	}
-
-	public void randomizeA() {
+	public void randomizeA() { // Randomize A matrix (used in randomize())
 		for (SparseArray column : a) {
-			probabilityFiller(column, "a");
+			probabilityFiller(column);
 		}
 	}
 
 	public void randomizeB(double polarizedValue) {
+		// Takes a polarizedValue for Mu and Sigma values generator (this value is used
+		// as base for Mu and Sigma)
 		Random randomgen = new Random(); // This need to be replaced with a probability generator
 		for (GaussianCurve curve : b) {
 			if (polarizedValue > 1) {
@@ -136,7 +142,7 @@ public class ContinuousModel {
 		}
 	}
 
-	private void probabilityFiller(SparseArray array, String test) {
+	private void probabilityFiller(SparseArray array) {
 		Random randomgen = new Random(); // This need to be replaced with a probability generator
 		double probabilitySum = 1.0; // Probability left to assign
 		for (int i = 0; i < array.effectiveLength(); i++) {
@@ -156,9 +162,9 @@ public class ContinuousModel {
 
 	public void readFromFile(String pathName) throws IllegalPiDefinitionException, IllegalADefinitionException,
 			IllegalBDefinitionException, IllegalStatesNamesSizeException {
-		readStartState(pathName + ".start");
-		readStatesTransitions(pathName + ".trans");
-		readCurves(pathName + ".curves");
+		readStartState(pathName + ".start"); // Pi
+		readStatesTransitions(pathName + ".trans"); // A
+		readCurves(pathName + ".curves"); // B
 	}
 
 	private void readStartState(String path) throws IllegalPiDefinitionException, IllegalStatesNamesSizeException {
@@ -295,14 +301,14 @@ public class ContinuousModel {
 	}
 
 	public void writeToFiles(String pathName) {
-		writePi(pathName + ".start");
-		writeStatesTransitions(pathName + ".trans");
-		writeCurves(pathName + ".curves");
+		writePi(pathName + ".start"); // Pi
+		writeStatesTransitions(pathName + ".trans"); // A
+		writeCurves(pathName + ".curves"); // B
 	}
 
 	private void writePi(String path) {
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(path))) {
-			for (int i = 0; i < statesName.size(); i++) { // Writes A
+			for (int i = 0; i < statesName.size(); i++) { // Writes Pi
 				bw.write(statesName.get(i) + "\t" + pi.getValue(statesName.indexOf(statesName.get(i))) + "\n");
 			}
 			bw.close();
