@@ -89,12 +89,14 @@ public class BWContainer {
 	public double getAlphaValue() { // Returns the probability of the model to be the generator of a sequence
 		if (!isAlphaProcessed) {
 			logger.log(Level.WARNING, "Alpha matrix hasn't been computed, -1 is returned!");
-			return -1.0; // -1 is returned and a warning issued if alpha hasn't been calculated previously
+			return -1.0; // -1 is returned and a warning issued if alpha hasn't been calculated
+							// previously
 		}
 		return alphaValue;
 	}
-	
-	public Couple[] getPsiArray() { // Returns the most likely states sequence the model has done to produce a sequence (Viterbi)
+
+	public Couple[] getPsiArray() { // Returns the most likely states sequence the model has done to produce a
+									// sequence (Viterbi)
 		return psiStates;
 	}
 

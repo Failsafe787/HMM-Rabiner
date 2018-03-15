@@ -31,7 +31,7 @@ public class BaumWelch {
 	private double currentLikelihood; // The probability the model has to generate the sequences provided above
 	private Logger logger = Log.getLogger();
 	private int round = 0; // Denotes the round number of BW
-	private boolean convergent = false; // Denotes if a worse model has been produced after a BW iteration 
+	private boolean convergent = false; // Denotes if a worse model has been produced after a BW iteration
 
 	// Constructor without a model already prepared
 	public BaumWelch(int nStates, String path, ArrayList<ObsSequence> sequences, boolean debug)
@@ -69,7 +69,8 @@ public class BaumWelch {
 		if (round == 0) {
 			currentModel.randomizePi(); // Randomize Pi and A (only at the beginning), read below for B
 			currentModel.randomizeA();
-			workingBench = new ArrayList<BWContainer>(); // Initializes a new "Working Bench" (ArrayList of BWContainers)
+			workingBench = new ArrayList<BWContainer>(); // Initializes a new "Working Bench" (ArrayList of
+															// BWContainers)
 			for (ObsSequence sequence : sequences) {
 				workingBench.add(new BWContainer(currentModel.getNumberOfStates(), sequence.size()));
 			}
@@ -85,7 +86,8 @@ public class BaumWelch {
 															// model
 			ObsSequence sequence = sequences.get(i);
 			if (round == 0) {
-				currentModel.randomizeB(sequence.getMean()); // Randomize Pi: Gaussians randomic values need to be polarized to
+				currentModel.randomizeB(sequence.getMean()); // Randomize Pi: Gaussians randomic values need to be
+																// polarized to
 																// the set (otherwise many 0 values are calculated by
 																// the probability density function due to sigma and mu)
 				if (debug) {
@@ -123,7 +125,8 @@ public class BaumWelch {
 						"New likelihood: " + newLikelihood + " | Current likelihood: " + currentLikelihood);
 			}
 			if (currentLikelihood > newLikelihood) {
-				convergent = true; // A worse model has been produced. NOTE: you can however continue doing BW iterations
+				convergent = true; // A worse model has been produced. NOTE: you can however continue doing BW
+									// iterations
 			}
 		}
 		currentLikelihood = newLikelihood; // Likelihood replaced
@@ -158,7 +161,8 @@ public class BaumWelch {
 			formulaLog.append("(");
 		}
 		int columnNumber = 0;
-		// Implementation of formula 109, simplified as described on the errata (formula 13)
+		// Implementation of formula 109, simplified as described on the errata (formula
+		// 13)
 		for (SparseArray column : a) {
 			for (Couple cell : column) {
 				double value = 0.0;
@@ -273,7 +277,8 @@ public class BaumWelch {
 			}
 		}
 		for (GaussianCurve curve : newB) {
-			curve.setMu(curve.getMu() / nStates); // Arithmetic mean of the Gaussians parameters has to be done after B merging
+			curve.setMu(curve.getMu() / nStates); // Arithmetic mean of the Gaussians parameters has to be done after B
+													// merging
 			curve.setSigma(curve.getSigma() / nStates);
 		}
 		return new ContinuousModel(nStates, newA, newB, newPi, currentModel.getStatesNames());
@@ -281,7 +286,8 @@ public class BaumWelch {
 
 	private void mergeA(SparseMatrix a, SparseMatrix newA, double alpha, boolean debug) {
 		int columnNumber = 0;
-		// Matrix addition (iterative, each time sums the values of newA and an A inside a container
+		// Matrix addition (iterative, each time sums the values of newA and an A inside
+		// a container
 		for (SparseArray column : a) {
 			for (Couple cell : column) {
 				int x = columnNumber;
@@ -305,7 +311,8 @@ public class BaumWelch {
 				newB[i].setSigma(newB[i].getSigma() + b[i].getSigma());
 			}
 		}
-		// NOTE: this is a partial formula, a division by the number of gaussians (= mean) must be done
+		// NOTE: this is a partial formula, a division by the number of gaussians (=
+		// mean) must be done
 		// after the addition of all the gaussians paramteters
 	}
 

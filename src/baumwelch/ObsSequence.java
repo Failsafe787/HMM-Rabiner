@@ -66,7 +66,8 @@ public class ObsSequence {
 									finished = true; // stupid way of exiting here
 								}
 							} catch (NumberFormatException e) {
-								logger.log(Level.WARNING,"There was an error while parsing \"" + values[i] + "\". Skipped!");
+								logger.log(Level.WARNING,
+										"There was an error while parsing \"" + values[i] + "\". Skipped!");
 							}
 						}
 					}
@@ -76,10 +77,12 @@ public class ObsSequence {
 			}
 			br.close();
 			if (!finished && fileFormat == 1) {
-				logger.log(Level.WARNING, "The file provided is invalid! Are you sure if it's in the format V1 V2 ... VN?");
+				logger.log(Level.WARNING,
+						"The file provided is invalid! Are you sure if it's in the format V1 V2 ... VN?");
 				sequence = null;
 			} else if (!valid && fileFormat == 2) {
-				logger.log(Level.WARNING, "The file provided is invalid! Are you sure if it's in the format V1\\nV2\\n ... VN?");
+				logger.log(Level.WARNING,
+						"The file provided is invalid! Are you sure if it's in the format V1\\nV2\\n ... VN?");
 				sequence = null;
 			}
 		} catch (FileNotFoundException e) {

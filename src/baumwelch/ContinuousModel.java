@@ -36,11 +36,13 @@ public class ContinuousModel {
 	private int nStates; // Number of states the model has
 	private Logger logger = Log.getLogger();
 
-	// Constructor used if A, B, Pi, number of states and names of the states are already available
+	// Constructor used if A, B, Pi, number of states and names of the states are
+	// already available
 	public ContinuousModel(int nStates, SparseMatrix a, GaussianCurve[] b, SparseArray pi,
 			ArrayList<String> statesNames) throws IllegalStatesNamesSizeException, IllegalADefinitionException,
 			IllegalBDefinitionException, IllegalPiDefinitionException {
-		// Consistency checks between the number of the states and the structures provided
+		// Consistency checks between the number of the states and the structures
+		// provided
 		if (a.getRowsNumber() != nStates && a.getColumnsNumber() != nStates) {
 			throw new IllegalADefinitionException();
 		}
@@ -86,7 +88,7 @@ public class ContinuousModel {
 		return pi;
 	}
 
-	public ArrayList<String> getStatesNames() { //  Returns all the states names stored in an array
+	public ArrayList<String> getStatesNames() { // Returns all the states names stored in an array
 		return statesName;
 	}
 
@@ -96,7 +98,7 @@ public class ContinuousModel {
 		}
 		this.a = a;
 	}
-	
+
 	public void setPi(SparseArray pi) { // Sets Pi
 		this.pi = pi;
 	}
@@ -186,8 +188,9 @@ public class ContinuousModel {
 						}
 						pi.setToValue(statesName.indexOf(tuple[0]), Double.parseDouble(tuple[1]));
 					} else {
-						throw new IllegalPiDefinitionException("A state in PI was declared more than one time!"); 
-						// State is already present, but that means  a double definition inside the file defining PI states
+						throw new IllegalPiDefinitionException("A state in PI was declared more than one time!");
+						// State is already present, but that means a double definition inside the file
+						// defining PI states
 					}
 					if (!valid) {
 						valid = true;
@@ -252,8 +255,9 @@ public class ContinuousModel {
 		}
 	}
 
-	private boolean readCurves(String path) throws IllegalBDefinitionException, IllegalStatesNamesSizeException { 
-		// Path + project name (e.g. /home/user/hmm/models/phone, without .pi, .trans or .curves extensions)
+	private boolean readCurves(String path) throws IllegalBDefinitionException, IllegalStatesNamesSizeException {
+		// Path + project name (e.g. /home/user/hmm/models/phone, without .pi, .trans or
+		// .curves extensions)
 		boolean valid = false;
 		try (BufferedReader br = new BufferedReader(new FileReader(path))) {
 			String line;

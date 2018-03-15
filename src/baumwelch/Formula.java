@@ -29,12 +29,12 @@ public class Formula {
 		if (debug) {
 			logger.log(Level.INFO, "\n\n[Induction of alpha]");
 		}
-		alphaInduction(model,container,sequence,scaled,debug);
+		alphaInduction(model, container, sequence, scaled, debug);
 		if (debug) {
 			logger.log(Level.INFO, "\n\n[Termination of alpha]");
 		}
-		alphaTermination(container,sequence.size(),scaled,debug);
-		
+		alphaTermination(container, sequence.size(), scaled, debug);
+
 	}
 
 	private static void alphaInitialization(ContinuousModel model, BWContainer container, ObsSequence sequence,
@@ -79,8 +79,8 @@ public class Formula {
 		}
 	}
 
-	private static void alphaInduction(ContinuousModel model, BWContainer container, ObsSequence sequence, boolean scaled,
-			boolean debug) {
+	private static void alphaInduction(ContinuousModel model, BWContainer container, ObsSequence sequence,
+			boolean scaled, boolean debug) {
 		// Gets all the required structures from model and container
 		SparseMatrix a = model.getA();
 		GaussianCurve[] b = model.getB();
@@ -88,7 +88,7 @@ public class Formula {
 		int time = sequence.size();
 		int numberOfStates = model.getNumberOfStates();
 		double[] factors = null;
-		if(scaled) {
+		if (scaled) {
 			factors = container.getScalingFactors();
 		}
 		ArrayList<String> statesNames = null;
@@ -116,8 +116,8 @@ public class Formula {
 				}
 				if (debug) {
 					if (previousColumn.effectiveLength() == 0) {
-						summatory.append("0.0"); // If the alpha of all the states at t-1 is 0, just print 0.0 
-												 // (since nothing has been printed before)
+						summatory.append("0.0"); // If the alpha of all the states at t-1 is 0, just print 0.0
+													// (since nothing has been printed before)
 					}
 					if (summatory.charAt(summatory.length() - 2) == '+') { // Text formatting (remove an unused '+')
 						summatory.deleteCharAt(summatory.length() - 1);
@@ -151,7 +151,7 @@ public class Formula {
 			}
 		}
 	}
-	
+
 	private static void alphaTermination(BWContainer container, int time, boolean scaled, boolean debug) {
 		// Gets all the required structures from model and container
 		SparseMatrix alphaMatrix = container.getAlphaMatrix();
@@ -165,7 +165,8 @@ public class Formula {
 				operationLog.append("0.0");
 			}
 		}
-		double alpha = 0.0; // Termination - Implementation of formula 21 (base formula) or 103 (scaled formula)
+		double alpha = 0.0; // Termination - Implementation of formula 21 (base formula) or 103 (scaled
+							// formula)
 		if (scaled) { // alpha scaled is 1/(product of all the scaling factors), as stated on formula
 						// 102 in Rabiner's paper, but due to the limited dynamic range of the machine
 						// formula 103 is used instead of the first one
@@ -203,14 +204,15 @@ public class Formula {
 		if (debug) {
 			logger.log(Level.INFO, "\n\n[Initialization of beta]");
 		}
-		betaInitialization(model,container,sequence.size(),scaled,debug);
+		betaInitialization(model, container, sequence.size(), scaled, debug);
 		if (debug) {
 			logger.log(Level.INFO, "\n\n[Induction of beta]");
 		}
-		betaInduction(model,container,sequence, scaled, debug);
+		betaInduction(model, container, sequence, scaled, debug);
 	}
-	
-	private static void betaInitialization(ContinuousModel model, BWContainer container, int sequenceSize, boolean scaled, boolean debug) {
+
+	private static void betaInitialization(ContinuousModel model, BWContainer container, int sequenceSize,
+			boolean scaled, boolean debug) {
 		// Gets all the required structures from model and container
 		int numberOfStates = model.getNumberOfStates();
 		SparseMatrix betaMatrix = container.getBetaMatrix();
@@ -237,15 +239,16 @@ public class Formula {
 			}
 		}
 	}
-	
-	private static void betaInduction(ContinuousModel model, BWContainer container, ObsSequence sequence, boolean scaled, boolean debug) {
+
+	private static void betaInduction(ContinuousModel model, BWContainer container, ObsSequence sequence,
+			boolean scaled, boolean debug) {
 		// Gets all the required structures from model and container
 		SparseMatrix a = model.getA();
 		GaussianCurve[] b = model.getB();
 		int numberOfStates = model.getNumberOfStates();
 		SparseMatrix betaMatrix = container.getBetaMatrix();
 		double[] factors = null; // NOTE: Alpha method must be executed before this!
-		if(scaled) {
+		if (scaled) {
 			factors = container.getScalingFactors();
 		}
 		int time = sequence.size();
@@ -270,9 +273,9 @@ public class Formula {
 							* betaMatrix.getValue(t + 1, state);
 
 					if (debug) {
-						betaLog.append("(" + a.getValue(i, state) + " x "
-								+ b[state].fi(sequence.getObservation(t + 1)) + " x beta(" + (t + 1) + ")("
-								+ statesNames.get(state) + ") [" + betaMatrix.getValue(t + 1, state) + "]) + ");
+						betaLog.append("(" + a.getValue(i, state) + " x " + b[state].fi(sequence.getObservation(t + 1))
+								+ " x beta(" + (t + 1) + ")(" + statesNames.get(state) + ") ["
+								+ betaMatrix.getValue(t + 1, state) + "]) + ");
 					}
 				}
 				if (debug) {
@@ -289,7 +292,7 @@ public class Formula {
 				betaMatrix.setToValue(t, i, betaInduction);
 			}
 			if (scaled) { // Uses all the scaling factors calculated with alpha
-						  // as stated by Rabiner at page 272 below formula 94
+							// as stated by Rabiner at page 272 below formula 94
 				SparseArray currentColumn = betaMatrix.getColumn(t);
 				for (Couple cell : currentColumn) {
 					cell.setValue(cell.getValue() * factors[t]);
@@ -323,8 +326,7 @@ public class Formula {
 		for (int i = 0; i < numberOfStates; i++) {
 			denominator += alphaMatrix.getValue(time, i) * betaMatrix.getValue(time, i);
 			if (debug) {
-				gammaLog
-						.append("(" + alphaMatrix.getValue(time, i) + " * " + betaMatrix.getValue(time, i) + ") + ");
+				gammaLog.append("(" + alphaMatrix.getValue(time, i) + " * " + betaMatrix.getValue(time, i) + ") + ");
 			}
 		}
 		if (debug) {
@@ -348,7 +350,7 @@ public class Formula {
 		// Gets all the required structures from model and container
 		SparseMatrix alphaMatrix = container.getAlphaMatrix();
 		SparseMatrix betaMatrix = container.getBetaMatrix();
-		if (time >= sequence.size() - 1) { // Xi cannot be used if there's a transition from statei 
+		if (time >= sequence.size() - 1) { // Xi cannot be used if there's a transition from statei
 			// at time T to statej at time T+1 (observation at time T+1 doesn't exist)
 			logger.log(Level.WARNING, "Xi formula used with an inexistent state j, 0.0 returned!");
 			return 0.0;
@@ -399,23 +401,23 @@ public class Formula {
 		}
 		return numerator / denominator;
 	}
-	
-	public static double psi(BWContainer container) { // Viterbi Algorithm, alpha method must be executed before than this
+
+	public static double psi(BWContainer container) { // Viterbi Algorithm, alpha method must be executed before than
+														// this
 		SparseMatrix alphaMatrix = container.getAlphaMatrix();
 		Couple[] psiStates = container.getPsiArray();
 		int columnNumber = 0; // Keep track of the column number while using "for-each"
-		for(SparseArray column : alphaMatrix) {
-			if(column.effectiveLength()==0) { // All the values in the column are 0
-				psiStates[columnNumber] = new Couple(0,0.0); // A placeholder cell C(x=column,y=0,value=0.0) is added to the sequence
-			}
-			else {
+		for (SparseArray column : alphaMatrix) {
+			if (column.effectiveLength() == 0) { // All the values in the column are 0
+				psiStates[columnNumber] = new Couple(0, 0.0); // A placeholder cell C(x=column,y=0,value=0.0) is added
+																// to the sequence
+			} else {
 				Couple best = null;
-				for(Couple cell : column) {
-					if(best==null) { // First cell visited
+				for (Couple cell : column) {
+					if (best == null) { // First cell visited
 						best = cell; // and it's considered the best at the moment
-					}
-					else { // It is possible to compare cells
-						if(Double.compare(best.getValue(),cell.getValue())<0) { // If best.value < current.value
+					} else { // It is possible to compare cells
+						if (Double.compare(best.getValue(), cell.getValue()) < 0) { // If best.value < current.value
 							best = cell; // Replace best with current visited cell
 						}
 					}
@@ -424,7 +426,7 @@ public class Formula {
 			}
 			columnNumber++;
 		}
-		return psiStates[(columnNumber -1)].getValue(); // Returns the value of the best cell at time T
+		return psiStates[(columnNumber - 1)].getValue(); // Returns the value of the best cell at time T
 	}
 
 }
