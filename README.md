@@ -7,7 +7,7 @@ This is a university project I'm developing for an exam. Many parts are or can b
 ## State
 
 ### Current version
-Version 0.1.13 - Saturday, March 17, 2018
+Version 0.1.14 - Saturday, March 17, 2018
 
 Made with Eclipse Oxygen.2 and Java 9
 
