@@ -31,7 +31,6 @@ public class BaumWelch {
 	private double currentLikelihood; // The probability the model has to generate the sequences provided above
 	private Logger logger = Log.getLogger();
 	private int round = 0; // Denotes the round number of BW
-	private boolean convergent = false; // Denotes if a worse model has been produced after a BW iteration
 
 	// Constructor without a model already prepared
 	public BaumWelch(int nStates, String path, ArrayList<ObsSequence> sequences, boolean debug)
@@ -123,10 +122,6 @@ public class BaumWelch {
 			if (debug) {
 				logger.log(Level.INFO,
 						"New likelihood: " + newLikelihood + " | Current likelihood: " + currentLikelihood);
-			}
-			if (currentLikelihood > newLikelihood) {
-				convergent = true; // A worse model has been produced. NOTE: you can however continue doing BW
-									// iterations
 			}
 		}
 		currentLikelihood = newLikelihood; // Likelihood replaced
@@ -314,11 +309,6 @@ public class BaumWelch {
 		// NOTE: this is a partial formula, a division by the number of gaussians (=
 		// mean) must be done
 		// after the addition of all the gaussians paramteters
-	}
-
-	public boolean isStopSuggested() { // Returns true if the model is convergent or more than a certain number of BW
-		// steps has been done (currently set to 30)
-		return (convergent || round > 29);
 	}
 
 	public int getCurrentRound() { // Returns the current round number

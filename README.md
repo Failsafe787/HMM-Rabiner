@@ -7,7 +7,7 @@ This is a university project I'm developing for an exam. Many parts are or can b
 ## State
 
 ### Current version
-Version 0.1.13 - Thursday, March 15, 2018
+Version 0.1.13 - Saturday, March 17, 2018
 
 Made with Eclipse Oxygen.2 and Java 9
 
@@ -20,7 +20,7 @@ Made with Eclipse Oxygen.2 and Java 9
 - [x] Implementation of scaled versions of Alpha and Beta
 - [x] Implementation of Baum-Welch algorithm
 - [x] Logging options for Baum-Welch algorithm
-- [ ] FINAL STEP - Implementation of a classificator which uses models created with Baum-Welch **<<< In progress**
+- [ ] FINAL STEP - Implementation of a classifier which uses models created with Baum-Welch **<<< In progress**
 
 ### Tests
 - [x] Tests for basic structures

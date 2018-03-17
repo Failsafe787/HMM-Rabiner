@@ -77,8 +77,9 @@ class BaumWelchTest {
 		}
 		assertTrue(bw_test != null);
 		try {
-			while (!bw_test.isStopSuggested())
+			while (bw_test.getCurrentRound()<30) {
 				bw_test.step(path, true, true);
+			}
 		} catch (IllegalStatesNamesSizeException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
