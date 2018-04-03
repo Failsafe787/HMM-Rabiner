@@ -8,6 +8,9 @@ package baumwelchTests;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import org.junit.jupiter.api.Test;
 
 import baumwelch.ObsSequence;
@@ -47,9 +50,21 @@ public class ObsSequenceTest {
 
 	@Test
 	public void fileSequenceVAS() {
-		ObsSequence observations = new ObsSequence(
-				"C:\\Users\\Luca Banzato\\Desktop\\Università\\ERC - Giordana\\Baum-Welch\\obs.txt",
-				ObsSequence.VALUEANDSPACE);
+		ObsSequence observations = null;
+		try {
+			observations = new ObsSequence(
+					"C:\\Users\\Luca Banzato\\Desktop\\Università\\ERC - Giordana\\Baum-Welch\\obs.txt",
+					ObsSequence.VALUEANDSPACE);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		assertTrue(Double.compare(observations.getObservation(0), 0.214) == 0);
 		assertTrue(Double.compare(observations.getObservation(1), 0.141) == 0);
 		assertTrue(Double.compare(observations.getObservation(2), 1.55) == 0);
@@ -59,9 +74,21 @@ public class ObsSequenceTest {
 
 	@Test
 	public void fileSequenceVPL() {
-		ObsSequence observations = new ObsSequence(
-				"C:\\Users\\Luca Banzato\\Desktop\\Università\\ERC - Giordana\\Baum-Welch\\obs2.txt",
-				ObsSequence.VALUEPERLINE);
+		ObsSequence observations = null;
+		try {
+			observations = new ObsSequence(
+					"C:\\Users\\Luca Banzato\\Desktop\\Università\\ERC - Giordana\\Baum-Welch\\obs2.txt",
+					ObsSequence.VALUEPERLINE);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		assertTrue(Double.compare(observations.getObservation(0), 0.214) == 0);
 		assertTrue(Double.compare(observations.getObservation(1), 0.141) == 0);
 		assertTrue(Double.compare(observations.getObservation(2), 1.55) == 0);

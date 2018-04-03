@@ -7,7 +7,7 @@ This is a university project I'm developing for an exam. Many parts are or can b
 ## State
 
 ### Current version
-Version 0.1.14 - Saturday, March 17, 2018
+Version 0.1.15 - Tuesday, April 2, 2018
 
 Made with Eclipse Oxygen.2 and Java 9
 
@@ -23,12 +23,6 @@ Made with Eclipse Oxygen.2 and Java 9
 - [ ] FINAL STEP - Implementation of a classifier which uses models created with Baum-Welch **<<< In progress**
 
 ### Tests
-- [x] Tests for basic structures
-- [ ] Tests for Alpha, Beta, Gamma and Psi formulas
-- [ ] Tests for Viterbi algoritm
-- [x] Tests for continuous observations
-- [ ] Tests for scaled versions of Alpha and Beta
-- [ ] Tests for Baum-Welch algorithm
 - [ ] Tests based on learning/pruning set and real data
 
 ### Revisions

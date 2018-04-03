@@ -39,7 +39,7 @@ public class ObsSequence {
 		this.sequence = new ArrayList<Double>(Arrays.asList(sequence));
 	}
 
-	public ObsSequence(String pathName, int fileFormat) { // Takes a pathname and file format, reads the specified file
+	public ObsSequence(String pathName, int fileFormat) throws FileNotFoundException, IOException, Exception { // Takes a pathname and file format, reads the specified file
 															// and builds this object
 		try (BufferedReader br = new BufferedReader(new FileReader(pathName))) {
 			sequence = new ArrayList<Double>();
@@ -80,20 +80,25 @@ public class ObsSequence {
 				logger.log(Level.WARNING,
 						"The file provided is invalid! Are you sure if it's in the format V1 V2 ... VN?");
 				sequence = null;
+				throw new IOException("The file provided is invalid! Are you sure if it's in the format V1 V2 ... VN?");
 			} else if (!valid && fileFormat == 2) {
 				logger.log(Level.WARNING,
 						"The file provided is invalid! Are you sure if it's in the format V1\\nV2\\n ... VN?");
 				sequence = null;
+				throw new IOException("The file provided is invalid! Are you sure if it's in the format V1\\nV2\\n ... VN?");
 			}
 		} catch (FileNotFoundException e) {
 			logger.log(Level.WARNING, "File " + pathName + " has not been found!");
 			sequence = null;
+			throw e;
 		} catch (IOException e) {
 			logger.log(Level.WARNING, "There was an IO error while reading " + pathName);
 			sequence = null;
+			throw e;
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "There was an error: " + e.getMessage());
 			sequence = null;
+			throw e;
 		}
 	}
 

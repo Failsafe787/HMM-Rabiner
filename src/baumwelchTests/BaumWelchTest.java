@@ -8,6 +8,8 @@ package baumwelchTests;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
@@ -56,7 +58,19 @@ class BaumWelchTest {
 		String path = "C:\\Users\\Luca Banzato\\Desktop\\test2\\heater";
 		Rescale.run("C:\\Users\\Luca Banzato\\Desktop\\test2\\data.2017_01_05.hst",
 				"C:\\Users\\Luca Banzato\\Desktop\\test2\\data.2017_01_05.resc", 4);
-		ObsSequence observation = new ObsSequence("C:\\Users\\Luca Banzato\\Desktop\\test2\\data.2017_01_05.resc", 2);
+		ObsSequence observation = null;
+		try {
+			observation = new ObsSequence("C:\\Users\\Luca Banzato\\Desktop\\test2\\data.2017_01_05.resc", 2);
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		ArrayList<ObsSequence> al_observations = new ArrayList<ObsSequence>();
 		al_observations.add(observation);
 		BaumWelch bw_test = null;
