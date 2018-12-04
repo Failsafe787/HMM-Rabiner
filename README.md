@@ -8,11 +8,11 @@ This is a university project I'm developing for an exam. Many parts are or can b
 
 ### Current version
 
-0.1.15 (02/04/2018) **Deprecated** 
+0.1.15 (02/04/2018) (Public build) **Deprecated** 
 
 *Current code is garbage due to lots of flaws caused by a bad application design_*
 
-0.X.01 (04/12/2018)
+0.X.01 (04/12/2018) (Private build)
 
 *A new version is currently under heavy development, featuring better application design, multimodel classifiers, Swing GUI and other stuff*
 
