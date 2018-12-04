@@ -7,28 +7,14 @@ This is a university project I'm developing for an exam. Many parts are or can b
 ## State
 
 ### Current version
-Version 0.1.15 - Tuesday, April 2, 2018
 
-Made with Eclipse Oxygen.2 and Java 9
+0.1.15 (02/04/2018) **Deprecated** 
 
-### Functionalities
-- [x] Implementation of basic structures (Couple, SparseArray, ...) inside utils package
-- [x] Implementation of Alpha, Beta, Gamma and Psi formulas
-- [x] Logging options for Alpha, Beta, Gamma and Psi formulas
-- [x] Implementation of Viterbi algorithm
-- [x] Implementation of Continuous data observations
-- [x] Implementation of scaled versions of Alpha and Beta
-- [x] Implementation of Baum-Welch algorithm
-- [x] Logging options for Baum-Welch algorithm
-- [ ] FINAL STEP - Implementation of a classifier which uses models created with Baum-Welch **<<< In progress**
+*Current code is garbage due to lots of flaws caused by a bad application design_*
 
-### Tests
-- [ ] Tests based on learning/pruning set and real data
+0.X.01 (04/12/2018)
 
-### Revisions
-- [ ] Code cleanup **<<< In progress**
-- [ ] Code comments **<<< In progress**
-- [ ] Optimizations
+*A new version is currently under heavy development, featuring better application design, multimodel classifiers, Swing GUI and other stuff*
 
 ## References
 * L. R. Rabiner - A Tutorial on Hidden Markov Models and Selected Applications in Speech Recognition: 
