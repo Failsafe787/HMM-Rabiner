@@ -26,6 +26,11 @@ This package contains the following items:
 * Few sample Hidden Markov Models, ready to be trained with the above dataset in order to recognise if an observations sequence
 has been produced by the heat pump while it was in heating or cooling mode
 
+## Source Code
+You can download this project (made with Eclipse 18-09 and JDK 1.8.0) by [clicking here](https://github.com/subwave07/HMM-Rabiner/archive/masterv1.zip) or using the command
+
+```git clone https://github.com/subwave07/HMM-Rabiner```
+
 ## Bugs
 Please, report any error or problem in the [Issues section](https://github.com/subwave07/HMM-Rabiner/issues) of this project!
 
