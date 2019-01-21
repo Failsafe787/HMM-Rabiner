@@ -47,4 +47,4 @@ http://alumni.media.mit.edu/~rahimi/rabiner/rabiner-errata/rabiner-errata.html
 
 ## Acknowledgements
 I'd like to thank PhD [Dario Vogogna](https://github.com/akyrey) for his [Hidden Markov Model Solver](https://github.com/akyrey/HiddenMarkovModel_Solver)
-implementation for the discrete domain obsevations, due to the fact it was very useful to understand some mistakes I was doing with my project.
+implementation for the discrete domain observations, due to the fact it was very useful to understand some mistakes I was doing with my project.
