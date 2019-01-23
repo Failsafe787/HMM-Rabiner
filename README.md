@@ -17,6 +17,9 @@ of the University of the Eastern Piedmont.
 *	Support for K-Fold Cross Validation
 *	Dataset rescaling tool
 
+## Report
+A report (**currently available only in Italian**) containing all the mathematics background and tests, is consultable [here](https://github.com/subwave07/HMM-Rabiner/blob/masterv1/CHMMS_Report.pdf).
+
 ## Download
 You can grab the latest release of this project [clicking here](https://github.com/subwave07/HMM-Rabiner/releases)!
 
