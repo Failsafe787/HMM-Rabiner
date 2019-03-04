@@ -49,5 +49,5 @@ https://www.cs.ubc.ca/~murphyk/Bayes/rabiner.pdf
 http://alumni.media.mit.edu/~rahimi/rabiner/rabiner-errata/rabiner-errata.html
 
 ## Acknowledgements
-I'd like to thank PhD Dario Vogogna [akyrey@github](https://github.com/akyrey) for his [Hidden Markov Model Solver](https://github.com/akyrey/HiddenMarkovModel_Solver)
+I'd like to thank PhD Dario Vogogna ([akyrey@github](https://github.com/akyrey)) for his [Hidden Markov Model Solver](https://github.com/akyrey/HiddenMarkovModel_Solver)
 implementation for the discrete domain observations, due to the fact it was very useful to understand some mistakes I was doing with my project.
