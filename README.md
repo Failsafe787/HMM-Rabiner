@@ -3,6 +3,10 @@ A Java implementation of the Baum-Welch algorithm based on HMM models with multi
 
 ![Continuous HMM Solver Previww](https://raw.githubusercontent.com/subwave07/HMM-Rabiner/masterv1/README.md_images/logo.jpg)
 
+|Download|Report|License|Issues|
+|---------|---------|---------|----------|
+| [![Download Button](https://img.shields.io/badge/CHMMS-1.0-blue.svg)](https://github.com/subwave07/HMM-Rabiner/releases) | [![Report Button](https://img.shields.io/badge/Report-Italian-yellow.svg)](https://github.com/subwave07/HMM-Rabiner/blob/masterv1/CHMMS_Report.pdf) | [![License MIT Button](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/subwave07/HMM-Rabiner/blob/master/LICENSE) | [![Report Problems Button](https://img.shields.io/badge/Report-Problems-red.svg)](https://github.com/subwave07/HMM-Rabiner/issues)|
+
 ## About this project
 This is a university project I developed for an exam of the Machine Learning university course held by Professor Attilio Giordana
 of the University of the Eastern Piedmont.
