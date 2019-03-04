@@ -30,7 +30,7 @@ This package contains the following items:
 has been produced by the heat pump while it was in heating or cooling mode
 
 ## Source Code
-You can download this project (made with Eclipse 18-09 and JDK 1.8.0) by [clicking here](https://github.com/subwave07/HMM-Rabiner/archive/masterv1.zip) or using the command
+You can download this project source code (made with Eclipse 18-09 and JDK 1.8.0) by [clicking here](https://github.com/subwave07/HMM-Rabiner/archive/masterv1.zip) or using the command
 
 ```git clone https://github.com/subwave07/HMM-Rabiner```
 
@@ -49,5 +49,5 @@ https://www.cs.ubc.ca/~murphyk/Bayes/rabiner.pdf
 http://alumni.media.mit.edu/~rahimi/rabiner/rabiner-errata/rabiner-errata.html
 
 ## Acknowledgements
-I'd like to thank PhD [Dario Vogogna](https://github.com/akyrey) for his [Hidden Markov Model Solver](https://github.com/akyrey/HiddenMarkovModel_Solver)
+I'd like to thank PhD Dario Vogogna [akyrey@github](https://github.com/akyrey) for his [Hidden Markov Model Solver](https://github.com/akyrey/HiddenMarkovModel_Solver)
 implementation for the discrete domain observations, due to the fact it was very useful to understand some mistakes I was doing with my project.
